@@ -37,6 +37,9 @@ public:
 	void predict();
 	void update(const Eigen::Matrix<double, 2, 1>& y, std_msgs::Header imageHeader);
 
+	geometry_msgs::PoseStamped getPoseStamped();
+	geometry_msgs::PoseWithCovarianceStamped getPoseWithCovariance();
+
 private:
 	 /**
 	  * Create a Kalman filter with the specified matrices.

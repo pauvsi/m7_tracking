@@ -82,10 +82,53 @@ void GroundVehicle::update(const Eigen::Matrix<double, 2, 1>& y, std_msgs::Heade
 	x_hat = x_hat_new;
 
 
-	t = t+dt;
+	t = t + imageHeader.stamp.sec - dataHeader.stamp.sec ;
 	dt = timeStep; //----------------
 	dataHeader = imageHeader;
 }
+
+geometry_msgs::PoseStamped GroundVehicle::getPoseStamped()
+{
+	//TODO: predict then give it, or don't predict?
+	this->predict();
+	geometry_msgs::PoseStamped pose;// = new geometry_msgs::PoseStamped(x_hat[0], x_hat[1], 0);
+	//TODO: Set ros time, to the time of the image
+	pose.header = dataHeader;
+	pose.header.stamp.sec = dataHeader.stamp.sec + dt-timeStep;
+	pose.header.stamp.nsec = dataHeader.stamp.nsec + (dt-timeStep)*pow10(9);
+	pose.pose.position.x = x_hat_new(0, 0);
+	pose.pose.position.y = x_hat_new(1, 0);
+	pose.pose.position.z = ROOMBA_HEIGHT;
+
+	return pose;
+}
+
+geometry_msgs::PoseWithCovarianceStamped GroundVehicle::getPoseWithCovariance()
+{
+	this->predict();
+	geometry_msgs::PoseWithCovarianceStamped pose;
+	pose.header = dataHeader;
+	pose.header.stamp.sec = dataHeader.stamp.sec + dt-timeStep;
+	pose.header.stamp.nsec = dataHeader.stamp.nsec + (dt-timeStep)*pow10(9);
+	//	pose.header.stamp =ros::Time(ros::Time(0));
+	pose.pose.pose.position.x = x_hat_new(0, 0);
+	pose.pose.pose.position.y = x_hat_new(1, 0);
+	pose.pose.pose.position.z = ROOMBA_HEIGHT;
+	boost::array<double, 36ul> covar;
+	for(int i=0; i<36; ++i)
+		covar[i] = 0.001;
+	covar[0] = P(0,0); covar[1] = P(0, 1); covar[6] = P(1, 0); covar[7] = P(1, 1);
+
+	//Not certain about yaw
+	covar[5] = covar[11] = covar[17] = covar[23] = covar[29] = covar[35] = 1000;
+
+
+	pose.pose.covariance = covar;
+
+	return pose;
+
+}
+
 
 
 
