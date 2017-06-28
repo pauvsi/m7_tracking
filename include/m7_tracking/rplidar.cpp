@@ -14,7 +14,7 @@ ObstacleDetector::ObstacleDetector(void)
 
 void ObstacleDetector::lidarCallback(const sensor_msgs::LaserScanConstPtr& input)
 {
-	this->lidarInp = *input;
+	this->lidarInput = *input;
 	this->inpHeader = (*input).header;
 	this->run();
 }

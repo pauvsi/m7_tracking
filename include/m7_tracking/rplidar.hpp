@@ -34,8 +34,8 @@ private:
 
 	ros::NodeHandle nh;
 	ros::Subscriber lidarSub;
-	ros::Publisher obsPub;
-	sensor_msgs::LaserScan lidarInp;
+	ros::Publisher obstaclePublisher;
+	sensor_msgs::LaserScan lidarInput;
 	std_msgs::Header inpHeader;
 	std::string lidar_frame;
 	std::string world_frame;

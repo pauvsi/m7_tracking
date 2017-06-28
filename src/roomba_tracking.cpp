@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include "m7_tracking/tracking.hpp"
+#include "../include/m7_tracking/tracker.hpp"
 
 int main(int argc, char** argv)
 {

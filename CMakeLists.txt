@@ -41,11 +41,14 @@ include_directories(
   ${Eigen_INCLUDE_DIRS}
 )
 
-add_library(trackers include/m7_tracking/tracker.cpp)
+add_library(tracker include/m7_tracking/tracker.cpp)
+add_library(lidar_tracking include/m7_tracking/rplidar.cpp)
 
-add_executable(roomba_trackers src/roomba_tracking.cpp)
+add_executable(roomba_tracker src/roomba_tracking.cpp)
 
-target_link_libraries(trackers ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
+target_link_libraries(tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
     ${Eigen_LIBRARIES})
-target_link_libraries(roomba_trackers ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
-    ${Eigen_LIBRARIES} trackers)
+target_link_libraries(lidar_tracking ${catkin_LIBRARIES})
+target_link_libraries(roomba_tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
+    ${Eigen_LIBRARIES} tracker)
+
