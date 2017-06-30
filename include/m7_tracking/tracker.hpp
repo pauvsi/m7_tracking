@@ -63,6 +63,7 @@ public:
 	void displayTargets();
 	void createTrackBars();
 	void run();
+	void removeOutofBounds();
 	void getWorldPosition();
 
 	std_msgs::Header getHeader()

@@ -30,6 +30,17 @@ public:
 		return obstaclePoses;
 	}
 
+	std::vector<tf::Vector3> getPoseVector()
+	{
+		std::vector<tf::Vector3> result;
+		for(auto e: obstaclePoses.poses)
+		{
+			result.push_back(tf::Vector3(e.position.x, e.position.y, e.position.z));
+		}
+
+		return result;
+	}
+
 private:
 
 	ros::NodeHandle nh;

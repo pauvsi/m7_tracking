@@ -60,7 +60,7 @@ private:
 	double t0, t;
 
 	//Time Step
-	const double timeStep;
+	double timeStep;
 	//Time since Last y
 	double dt;
 
@@ -76,3 +76,5 @@ private:
 	//Time stamp header
 	std_msgs::Header dataHeader;
 };
+
+#endif

@@ -203,9 +203,29 @@ void Tracker::run()
 
 
 		displayTargets();
+		getWorldPosition();
+
 		return;
 
 
+}
+
+
+
+void Tracker::removeOutofBounds()
+{
+	for(int  i=0; i < worldRoombaPosition.size(); ++i)
+	{
+		if((worldRoombaPosition[i].getX() >= -10.0 && worldRoombaPosition[i].getX() <= 10.00) &&
+		   (worldRoombaPosition[i].getY() >= -10.0 && worldRoombaPosition[i].getY() <=10.00))
+		{
+
+		}
+		else
+		{
+			worldRoombaPosition.erase(worldRoombaPosition.begin()+i);
+		}
+	}
 }
 
 void Tracker::getWorldPosition()
@@ -243,6 +263,7 @@ void Tracker::getWorldPosition()
 		projectedPoses.push_back(tf::Vector3(undistortedPoses[i].x, undistortedPoses[i].y, 1));
 	}
 */
+
 	//[x y z] of projected points in world coordinate frame
 	vector<tf::Vector3> worldProjectedPoses;
 	tf::Vector3 cameraPos = worldToCam.getOrigin(); //Origin of cam in world frame
@@ -273,6 +294,8 @@ void Tracker::getWorldPosition()
 													cameraPos.getY() + lineParameter*lineVector.getY(),
 													ROOMBA_HEIGHT));
 	}
+
+	removeOutofBounds();
 
 	for(int i = 0; i<worldRoombaPosition.size(); ++i)
 	{

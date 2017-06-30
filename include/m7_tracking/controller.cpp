@@ -25,13 +25,20 @@ Controller::Controller()
 	greenTargetTracker[4] = *(new Tracker(CAMERA_TOPIC_5, CAMERA_FRAME_5, GREENILOWHUE, GREENIHIGHHUE,
 										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE));
 
+	obsDet = *(new ObstacleDetector());
+
 	// INITIALIZE KALMAN FILTERS
 	//0-4 for red 5-9 green
 	for(int i=0; i<10; ++i)
 		targets[i] = *(new GroundVehicle());
 
+	for(int i=0; i<5; ++i)
+		obstacles[i] = *(new GroundVehicle());
+
 
 	this->init();
+
+
 }
 
 //TODO: check if initialization is right!!
@@ -49,6 +56,11 @@ void Controller::init()
 		targets[i].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1>(uniqueRedPoses[i].getX(), uniqueRedPoses[i].getY(), 0, 0));
 		targets[i+5].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1>(uniqueGreenPoses[i].getX(), uniqueGreenPoses[i].getY(), 0, 0));
 	}
+
+	for(int i=0; i<4; ++i)
+	{
+		obstacles[i].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1>(uniqueObstaclePoses[i].getX(), uniqueObstaclePoses[i].getY(), 0,0));
+	}
 }
 
 void Controller::getReadings()
@@ -64,7 +76,7 @@ void Controller::getReadings()
 //
 //	}
 
-	uniqueRedPoses.clear(); uniqueGreenPoses.clear();
+	uniqueRedPoses.clear(); uniqueGreenPoses.clear(); uniqueObstaclePoses.clear();
 
 	for(int i=0; i<5; ++i)
 	{
@@ -77,6 +89,11 @@ void Controller::getReadings()
 			uniqueGreenPoses.push_back(e);
 		}
 
+	}
+
+	for(auto& e: obsDet.getPoseVector())
+	{
+		uniqueObstaclePoses.push_back(e);
 	}
 
 	this->imageHeader = redTargetTracker[4].getHeader();
@@ -154,18 +171,19 @@ void Controller::removeCopies()
 	std::sort(uniqueRedPoses.begin(), uniqueRedPoses.end(), wayToSort);
 	std::sort(uniqueGreenPoses.begin(), uniqueGreenPoses.end(), wayToSort);
 
+
 	mergeCopies(uniqueRedPoses);
 	mergeCopies(uniqueGreenPoses);
 }
 
-void Controller::updatePos()
+void Controller::updateTargetPos()
 {
 	//Go through unique poses, find matching positions and update the Kalman Filters
 	//What if I don't get a measurement for a roomba? ANS: Find out through empty list
 
 	float min = FLT_MAX;
 	float displacement;
-	std::vector<geometry_msgs::PoseStamped, 5> currPose;
+	std::vector<geometry_msgs::PoseStamped> currPose(5);
 	int posIndex, targetIndex;
 
 	//RED
@@ -202,7 +220,7 @@ void Controller::updatePos()
 		currPose.erase(currPose.begin()+targetIndex);
 	}
 
-	//RED
+	//GREEN
 	for(int i=0; i<5; ++i)
 		currPose[i] = targets[i+5].getPoseStamped();
 
@@ -236,4 +254,56 @@ void Controller::updatePos()
 		currPose.erase(currPose.begin()+targetIndex);
 	}
 
+
+}
+
+void Controller::updateObsPos()
+{
+	float min = FLT_MAX;
+		float displacement;
+		std::vector<geometry_msgs::PoseStamped> currPose(4);
+		int posIndex, targetIndex;
+
+		//Obstacles
+		for(int i=0; i<4; ++i)
+			currPose[i] = targets[i].getPoseStamped();
+
+		for(int i=0; i<4; ++i)
+			{
+				if(uniqueObstaclePoses.empty())
+					break;
+
+				min = FLT_MAX;
+				for(int k=0; k<currPose.size();++k)
+				{
+					int j = 0;
+					while(j < uniqueObstaclePoses.size())
+					{
+						displacement = (currPose[k].pose.position.x - uniqueObstaclePoses[j].getX())*
+										(currPose[k].pose.position.x - uniqueObstaclePoses[j].getX()) +
+											(currPose[k].pose.position.y - uniqueObstaclePoses[j].getY())*
+											(currPose[k].pose.position.y - uniqueObstaclePoses[j].getY());
+						if(displacement < min)
+						{
+							min = displacement;
+							posIndex = j;
+							targetIndex = k;
+						}
+						++j;
+					}
+				}
+
+				obstacles[targetIndex].update(Eigen::Matrix<double, 2, 1>(uniqueObstaclePoses[posIndex].getX(), uniqueObstaclePoses[posIndex].getY()), imageHeader);
+				uniqueObstaclePoses.erase(uniqueObstaclePoses.begin()+posIndex);
+				currPose.erase(currPose.begin()+targetIndex);
+			}
+}
+
+
+void Controller::run()
+{
+	getReadings();
+	removeCopies();
+	updateTargetPos();
+	updateObsPos();
 }

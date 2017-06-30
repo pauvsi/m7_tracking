@@ -16,6 +16,7 @@
 
 #include "tracker.hpp"
 #include "ground_vehicle.hpp"
+#include "rplidar.hpp"
 
 #define CAMERA_TOPIC_1 "/cameraBottom/image_color"
 #define CAMERA_TOPIC_2 "/cameraFront/image_color"
@@ -52,7 +53,9 @@ public:
 	void getReadings();
 	void removeCopies();
 	void mergeCopies(std::vector<tf::Vector3> &uniquePoses);
-	void updatePos();
+	void updateTargetPos();
+	void updateObsPos();
+	void run();
 
 private:
 	ros::NodeHandle nh;
@@ -62,6 +65,9 @@ private:
 	GroundVehicle targets[10];
 	std::vector<tf::Vector3> uniqueRedPoses;
 	std::vector<tf::Vector3> uniqueGreenPoses;
+	std::vector<tf::Vector3> uniqueObstaclePoses;
+	ObstacleDetector obsDet;
+	GroundVehicle obstacles[4];
 	std_msgs::Header imageHeader;
 };
 
