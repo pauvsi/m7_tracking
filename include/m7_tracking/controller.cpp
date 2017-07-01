@@ -53,13 +53,13 @@ void Controller::init()
 //		targets[i].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1>::Matrix(scalars));
 
 //		scalars[0] = uniqueGreenPoses[i].getX(); scalars[1] = uniqueGreenPoses[i].getY();
-		targets[i].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1>(uniqueRedPoses[i].getX(), uniqueRedPoses[i].getY(), 0, 0));
-		targets[i+5].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1>(uniqueGreenPoses[i].getX(), uniqueGreenPoses[i].getY(), 0, 0));
+		targets[i].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1>  (uniqueRedPoses[i].getX(), uniqueRedPoses[i].getY(), 0, 0));
+		targets[i+5].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1> (uniqueGreenPoses[i].getX(), uniqueGreenPoses[i].getY(), 0, 0));
 	}
 
 	for(int i=0; i<4; ++i)
 	{
-		obstacles[i].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1>(uniqueObstaclePoses[i].getX(), uniqueObstaclePoses[i].getY(), 0,0));
+		obstacles[i].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1> ( uniqueObstaclePoses[i].getX(), uniqueObstaclePoses[i].getY(), 0,0));
 	}
 }
 
@@ -215,7 +215,7 @@ void Controller::updateTargetPos()
 			}
 		}
 
-		targets[targetIndex].update(Eigen::Matrix<double, 2, 1>(uniqueRedPoses[posIndex].getX(), uniqueRedPoses[posIndex].getY()), imageHeader);
+		targets[targetIndex].update(Eigen::Matrix<double, 2, 1>  (uniqueRedPoses[posIndex].getX(), uniqueRedPoses[posIndex].getY()), imageHeader);
 		uniqueRedPoses.erase(uniqueRedPoses.begin()+posIndex);
 		currPose.erase(currPose.begin()+targetIndex);
 	}
@@ -249,7 +249,7 @@ void Controller::updateTargetPos()
 			}
 		}
 
-		targets[targetIndex+5].update(Eigen::Matrix<double, 2, 1>(uniqueGreenPoses[posIndex].getX(), uniqueGreenPoses[posIndex].getY()), imageHeader);
+		targets[targetIndex+5].update(Eigen::Matrix<double, 2, 1>  (uniqueGreenPoses[posIndex].getX(), uniqueGreenPoses[posIndex].getY()), imageHeader);
 		uniqueGreenPoses.erase(uniqueGreenPoses.begin()+posIndex);
 		currPose.erase(currPose.begin()+targetIndex);
 	}
@@ -293,7 +293,7 @@ void Controller::updateObsPos()
 					}
 				}
 
-				obstacles[targetIndex].update(Eigen::Matrix<double, 2, 1>(uniqueObstaclePoses[posIndex].getX(), uniqueObstaclePoses[posIndex].getY()), imageHeader);
+				obstacles[targetIndex].update(Eigen::Matrix<double, 2, 1> ( uniqueObstaclePoses[posIndex].getX(), uniqueObstaclePoses[posIndex].getY()), imageHeader);
 				uniqueObstaclePoses.erase(uniqueObstaclePoses.begin()+posIndex);
 				currPose.erase(currPose.begin()+targetIndex);
 			}

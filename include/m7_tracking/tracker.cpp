@@ -14,6 +14,15 @@ using cv::Moments;
 using cv::Point2f;
 using cv::Scalar;
 
+/*
+ * Add topic for each roomba
+ * make sure current image time is latest since the buffer is 2.
+ * Make sure matrix initialization is right.
+ * Unit tests
+ *
+ */
+
+
 
 
 
@@ -27,7 +36,7 @@ Tracker::Tracker()
 
 	image_transport::ImageTransport it(nh);
 
-	this->cameraSub = it.subscribeCamera(this->getCameraTopic(), 1, &Tracker::cameraCallback, this);
+	this->cameraSub = it.subscribeCamera(this->getCameraTopic(), 2, &Tracker::cameraCallback, this);
 
 	ROS_DEBUG_STREAM(cameraSub.getInfoTopic());
 	ROS_DEBUG_STREAM(cameraSub.getTopic());
@@ -59,7 +68,7 @@ Tracker::Tracker(std::string cameraTopic, std::string cameraFrame, int target_Lo
 
 	image_transport::ImageTransport it(nh);
 
-	this->cameraSub = it.subscribeCamera(this->getCameraTopic(), 1, &Tracker::cameraCallback, this);
+	this->cameraSub = it.subscribeCamera(this->getCameraTopic(), 2, &Tracker::cameraCallback, this);
 
 	ROS_DEBUG_STREAM(cameraSub.getInfoTopic());
 	ROS_DEBUG_STREAM(cameraSub.getTopic());

@@ -50,7 +50,7 @@ add_executable(roomba_tracker src/roomba_tracking.cpp)
 target_link_libraries(tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
     ${Eigen_LIBRARIES})
 target_link_libraries(lidar_tracking ${catkin_LIBRARIES})
-target_link_libraries(roomba_tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
-    ${Eigen_LIBRARIES} tracker)
 target_link_libraries(roomba ${catkin_LIBRARIES} ${Eigen_LIBRARIES})
 target_link_libraries(controller ${catkin_LIBRARIES} ${Eigen_LIBRARIES})
+target_link_libraries(roomba_tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
+    ${Eigen_LIBRARIES} controller lidar_tracking roomba tracker)

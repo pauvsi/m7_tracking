@@ -58,12 +58,12 @@ void GroundVehicle::predict()
 	}
 
 //TODO: Check and make sure
-	//	F(0,2) = F(1,3) = dt;
-	//	Q(0,0) = Q(1,1) = 0.1*dt;
-	//  Q(2,2) = Q(3,3) = 0.5*dt;
+	F(0,2) = F(1,3) = dt;
+	Q(0,0) = Q(1,1) = 0.1*dt;
+	Q(2,2) = Q(3,3) = 0.5*dt;
 	x_hat_new = F*x_hat;
 	P = F*P*F.transpose() + Q;
-	//	dt = dt + timeStep;
+	dt = dt + timeStep;
 
 }
 
