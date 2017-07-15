@@ -35,6 +35,21 @@ Controller::Controller()
 	for(int i=0; i<5; ++i)
 		obstacles[i] = *(new GroundVehicle());
 
+	red1 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("roomba/roomba1", 1);
+	red2 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("roomba/roomba2", 1);
+	red3 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("roomba/roomba3", 1);
+	red4 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("roomba/roomba4", 1);
+	red5 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("roomba/roomba5", 1);
+	green1 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("roomba/roomba6", 1);
+	green2 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("roomba/roomba7", 1);
+	green3 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("roomba/roomba8", 1);
+	green4 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("roomba/roomba9", 1);
+	green5 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("roomba/roomba10", 1);
+
+	obs1 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("obstacle/obstacle1", 1);
+	obs2 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("obstacle/obstacle2", 1);
+	obs3 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("obstacle/obstacle3", 1);
+	obs4 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("obstacle/obstacle4", 1);
 
 	this->init();
 
@@ -80,6 +95,9 @@ void Controller::getReadings()
 
 	for(int i=0; i<5; ++i)
 	{
+		if(redTargetTracker[i].curImgOlder)
+			continue;
+
 		for(auto& e: redTargetTracker[i].getPoses())
 		{
 			uniqueRedPoses.push_back(e);
@@ -186,6 +204,7 @@ void Controller::updateTargetPos()
 	std::vector<geometry_msgs::PoseStamped> currPose(5);
 	int posIndex, targetIndex;
 
+//TODO: THIS PREDICT WITH THE PREDICTION MIGHT BE A PROBLEM
 	//RED
 	for(int i=0; i<5; ++i)
 		currPose[i] = targets[i].getPoseStamped();
@@ -215,7 +234,7 @@ void Controller::updateTargetPos()
 			}
 		}
 
-		targets[targetIndex].update(Eigen::Matrix<double, 2, 1>  (uniqueRedPoses[posIndex].getX(), uniqueRedPoses[posIndex].getY()), imageHeader);
+		targets[targetIndex].update(Eigen::Matrix<double, 2, 1>(uniqueRedPoses[posIndex].getX(), uniqueRedPoses[posIndex].getY()), imageHeader);
 		uniqueRedPoses.erase(uniqueRedPoses.begin()+posIndex);
 		currPose.erase(currPose.begin()+targetIndex);
 	}
@@ -299,6 +318,25 @@ void Controller::updateObsPos()
 			}
 }
 
+void Controller::publishAll()
+{
+	red1.publish(targets[0].getPoseWithCovariance());
+	red2.publish(targets[1].getPoseWithCovariance());
+	red3.publish(targets[2].getPoseWithCovariance());
+	red4.publish(targets[3].getPoseWithCovariance());
+	red5.publish(targets[4].getPoseWithCovariance());
+	green1.publish(targets[5].getPoseWithCovariance());
+	green2.publish(targets[6].getPoseWithCovariance());
+	green3.publish(targets[7].getPoseWithCovariance());
+	green4.publish(targets[8].getPoseWithCovariance());
+	green5.publish(targets[9].getPoseWithCovariance());
+
+	obs1.publish(obstacles[0].getPoseWithCovariance());
+	obs2.publish(obstacles[1].getPoseWithCovariance());
+	obs3.publish(obstacles[2].getPoseWithCovariance());
+	obs4.publish(obstacles[3].getPoseWithCovariance());
+}
+
 
 void Controller::run()
 {
@@ -306,4 +344,5 @@ void Controller::run()
 	removeCopies();
 	updateTargetPos();
 	updateObsPos();
+	publishAll();
 }

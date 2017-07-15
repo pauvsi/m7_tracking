@@ -56,10 +56,13 @@ public:
 	void updateTargetPos();
 	void updateObsPos();
 	void run();
+	void publishAll();
 
 private:
 	ros::NodeHandle nh;
 	ros::Publisher posPub;
+	ros::Publisher red1, red2, red3, red4, red5, green1, green2, green3, green4, green5;
+	ros::Publisher obs1, obs2, obs3, obs4;
 	Tracker redTargetTracker[5];
 	Tracker greenTargetTracker[5];
 	GroundVehicle targets[10];

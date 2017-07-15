@@ -30,10 +30,11 @@
 #include <vector>
 #include <string.h>
 #include <std_msgs/Header.h>
+#include <float.h>
 
 #define CANNY_THRESHOLD 100
 #define ROOMBA_HEIGHT 0.09
-#define DEFAULT_CAMERA_TOPIC "/camera/image"
+#define DEFAULT_CAMERA_TOPIC "/camera/image_color_rect"
 #define DEFAULT_ODOM_FRAME_NAME "odom"
 #define DEFAULT_CAMERA_FRAME_NAME "camera_frame"
 //#define DEFAULT_COM_FRAME_NAME "base_link"
@@ -50,6 +51,7 @@ public:
 	void readROSParameters();
 	void cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam);
 	cv::Mat get3x3FromVector(boost::array<double, 9> vec);
+	bool curImgOlder;
 
 	void setK(cv::Mat _K)
 	{
@@ -87,6 +89,9 @@ protected:
 	int target_HighSat;
 	int target_LowValue;
 	int target_HighValue;
+	double currentImgTime;
+	double lastImgTime;
+
 	std::string cameraTopic;
 	std::string camera_frame;
 	std::string world_frame;

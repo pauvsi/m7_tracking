@@ -62,7 +62,9 @@ void GroundVehicle::predict()
 	Q(0,0) = Q(1,1) = 0.1*dt;
 	Q(2,2) = Q(3,3) = 0.5*dt;
 	x_hat_new = F*x_hat;
-	P = F*P*F.transpose() + Q;
+	if(dt == timeStep)
+		P = F*P*F.transpose() + Q;
+
 	dt = dt + timeStep;
 
 }
@@ -100,6 +102,10 @@ geometry_msgs::PoseStamped GroundVehicle::getPoseStamped()
 	pose.pose.position.y = x_hat_new(1, 0);
 	pose.pose.position.z = ROOMBA_HEIGHT;
 
+	//Orientation x&y are x velocity and y velocity
+	pose.pose.orientation.x = x_hat_new(2, 0);
+	pose.pose.orientation.y = x_hat_new(3, 0);
+
 	return pose;
 }
 
@@ -114,6 +120,11 @@ geometry_msgs::PoseWithCovarianceStamped GroundVehicle::getPoseWithCovariance()
 	pose.pose.pose.position.x = x_hat_new(0, 0);
 	pose.pose.pose.position.y = x_hat_new(1, 0);
 	pose.pose.pose.position.z = ROOMBA_HEIGHT;
+
+	//Orientation x&y are x velocity and y velocity
+	pose.pose.pose.orientation.x = x_hat_new(2, 0);
+	pose.pose.pose.orientation.y = x_hat_new(3, 0);
+
 	boost::array<double, 36ul> covar;
 	for(int i=0; i<36; ++i)
 		covar[i] = 0.001;

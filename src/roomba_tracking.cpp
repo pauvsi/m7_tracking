@@ -5,8 +5,10 @@ int main(int argc, char** argv)
 {
     ros::init(argc, argv, "m7_tracking", ros::init_options::AnonymousName);
     Controller controlMain;
-    controlMain.run();
-
-    ros::spin();
+    while(ros::ok())
+    {
+    	controlMain.run();
+    	ros::spinOnce();
+    }
     return 0;
 }

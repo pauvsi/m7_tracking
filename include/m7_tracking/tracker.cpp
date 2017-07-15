@@ -49,6 +49,10 @@ Tracker::Tracker()
 	target_LowValue = 105;
 	target_HighValue = 256;
 
+	currentImgTime = DBL_MIN;
+	lastImgTime = DBL_MIN;
+	curImgOlder = false;
+
 	ROS_DEBUG_STREAM(" Initialization Complete");
 }
 
@@ -74,7 +78,9 @@ Tracker::Tracker(std::string cameraTopic, std::string cameraFrame, int target_Lo
 	ROS_DEBUG_STREAM(cameraSub.getTopic());
 	ROS_DEBUG_STREAM(cameraSub.getTransport());
 
-
+	currentImgTime = DBL_MIN;
+	lastImgTime = DBL_MIN;
+	curImgOlder = false;
 
 	ROS_DEBUG_STREAM("Done");
 }
@@ -82,6 +88,17 @@ Tracker::Tracker(std::string cameraTopic, std::string cameraFrame, int target_Lo
 void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam)
 {
 	this->imageHeader =	img->header;
+	lastImgTime = currentImgTime;
+	currentImgTime = img->header.stamp.toNSec();
+	if(currentImgTime < lastImgTime)
+	{
+		currentImgTime = lastImgTime;
+		curImgOlder = true;
+	}
+	else
+	{
+		curImgOlder = false;
+	}
 	ROS_DEBUG_STREAM("Listening To Camera: In callback");
 
 	//set the K and D matrices
@@ -253,18 +270,20 @@ void Tracker::getWorldPosition()
 	}
 
 	// [u v]
-	vector<cv::Point2f> undistortedPoses;
-
+//	vector<cv::Point2f> undistortedPoses;
+/*
 	if(!FISHEYE_DISTORTION)
 		cv::undistortPoints(imgRoombaPoses, undistortedPoses, this->K, this->D);
 	else
 		cv::fisheye::undistortPoints(imgRoombaPoses, undistortedPoses, this->K, this->D);
+*/
 
-	// [u v 1] format
+	// [x y z] projected from camera onto plane, 1m away from lens
 	vector<tf::Vector3> projectedPoses;
-	for(auto e : undistortedPoses)
+
+	for(auto e : imgRoombaPoses)
 	{
-		projectedPoses.push_back(tf::Vector3(e.x, e.y, 1));
+		projectedPoses.push_back(tf::Vector3(K.inv()*tf::Vector3(e.x, e.y, 1)));
 	}
 /*
 	for(int i=0; i<undistortedPoses.size(); ++i)
