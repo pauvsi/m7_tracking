@@ -11,7 +11,7 @@
 #include <sensor_msgs/LaserScan.h>
 
 #define FREQUENCY 6.25
-#define DEFAULT_SCAN_TOPIC "/scan"
+#define DEFAULT_SCAN_TOPIC "laser/scan"
 #define DEFAULT_ODOM_FRAME_NAME "odom"
 #define DEFAULT_COM_FRAME_NAME "base_link"
 #define DEFAULT_WORLD_FRAME_NAME "world"
