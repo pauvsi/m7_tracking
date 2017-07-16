@@ -1,4 +1,4 @@
-#include "ground_vehicle.hpp"
+#include "ground_vehicle.h"
 
 GroundVehicle::GroundVehicle(double dt,
 									const Eigen::Matrix4d& F,

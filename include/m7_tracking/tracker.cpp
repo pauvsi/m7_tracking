@@ -5,7 +5,7 @@
  *      Author: Logesh Roshan Ramadoss
  */
 
-#include "tracker.hpp"
+#include "tracker.h"
 using std::vector;
 using cv::Mat;
 using cv::Point;
@@ -54,6 +54,11 @@ Tracker::Tracker()
 	curImgOlder = false;
 
 	ROS_DEBUG_STREAM(" Initialization Complete");
+}
+
+Tracker::~Tracker()
+{
+
 }
 
 Tracker::Tracker(std::string cameraTopic, std::string cameraFrame, int target_LowHue, int target_HighHue, int target_LowSat, int target_HighSat,
@@ -256,13 +261,14 @@ void Tracker::removeOutofBounds()
 
 void Tracker::getWorldPosition()
 {
-	static tf::TransformListener listener;
+//	tf::TransformListener listener;
 	tf::StampedTransform worldToCam;
+	listener = new tf::TransformListener();
 
 	//NOTE: If you multiply WorldToCam with a pos in world frame, then you'll get a pos in cam coord frame
 	try
 	{
-		listener.lookupTransform(this->camera_frame, this->world_frame, ros::Time(ros::Time(0)), worldToCam);
+		listener->lookupTransform(this->camera_frame, this->world_frame, ros::Time(ros::Time(0)), worldToCam);
 	}
 	catch(tf::TransformException &e)
 	{
@@ -279,12 +285,24 @@ void Tracker::getWorldPosition()
 */
 
 	// [x y z] projected from camera onto plane, 1m away from lens
-	vector<tf::Vector3> projectedPoses;
+	//vector<tf::Vector3> projectedPoses;
+	//[u v 1] format
+	std::vector<cv::Mat_<float> > cvPoints;
 
-	for(auto e : imgRoombaPoses)
+	for(auto e:imgRoombaPoses)
 	{
-		projectedPoses.push_back(tf::Vector3(K.inv()*tf::Vector3(e.x, e.y, 1)));
+		cvPoints.push_back((cv::Mat_<float>(3, 1) << e.x, e.y, 1));
 	}
+
+	std::vector<cv::Mat_<float> > projectedPoses;
+	cv::Mat invK = K.inv();
+
+	for(auto e:projectedPoses)
+	{
+		projectedPoses.push_back((invK*e));
+	}
+
+
 /*
 	for(int i=0; i<undistortedPoses.size(); ++i)
 	{
@@ -300,7 +318,7 @@ void Tracker::getWorldPosition()
 
 	for(auto e : projectedPoses)
 	{
-		worldProjectedPoses.push_back(camToWorld * (tf::Vector3(e))); // will give point in woorld coord
+		worldProjectedPoses.push_back(worldToCam * (tf::Vector3(e(0, 0), e(1, 0), e(2, 0)))); // will give point in woorld coord
 	}
 
 
@@ -342,8 +360,8 @@ void Tracker::getWorldPosition()
 		transform.setOrigin(worldRoombaPosition[i]);
 
 
-		br.sendTransform(tf::StampedTransform(transform, imageHeader.stamp, this->world_frame,
-						std::string(this->camera_frame + " Roomba " + boost::lexical_cast<std::string>(i))));
+//		br.sendTransform(tf::StampedTransform(transform, imageHeader.stamp, this->world_frame,
+//						std::string(this->camera_frame + " Roomba " + boost::lexical_cast<std::string>(i))));
 //		br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), this->world_frame,
 //								buffer));
 	}

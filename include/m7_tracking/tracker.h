@@ -45,7 +45,8 @@ class Tracker
 {
 public:
 
-	Tracker(void);
+	Tracker();
+	virtual ~Tracker();
 	Tracker(std::string cameraTopic, std::string cameraFrame, int Target_LowHue, int Target_HighHue, int Target_LowSat, int Target_HighSat,
 			int Target_LowValue, int Target_HighValue);
 	void readROSParameters();
@@ -101,6 +102,8 @@ protected:
 	image_transport::CameraSubscriber cameraSub;
 	std_msgs::Header imageHeader;
 	cv::Mat inputImg;
+
+	tf::TransformListener* listener;
 
 
 

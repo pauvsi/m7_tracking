@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <boost/lexical_cast.hpp>
+//#include <boost/lexical_cast.hpp>
 #include <sensor_msgs/Image.h>
 //#include <tf2_ros/message_filter.h>
 //#include <tf2_ros/transform_listener.h>
@@ -14,15 +14,15 @@
 #include <iterator>
 #include <std_msgs/Header.h>
 
-#include "tracker.hpp"
-#include "ground_vehicle.hpp"
-#include "rplidar.hpp"
+#include "tracker.h"
+#include "ground_vehicle.h"
+#include "rplidar.h"
 
-#define CAMERA_TOPIC_1 "/cameraBottom/image_color"
-#define CAMERA_TOPIC_2 "/cameraFront/image_color"
-#define CAMERA_TOPIC_3 "/cameraRight/image_color"
-#define CAMERA_TOPIC_4 "/cameraBack/image_color"
-#define CAMERA_TOPIC_5 "/cameraLeft/image_color"
+#define CAMERA_TOPIC_1 "bottom_camera/image_color_rect"
+#define CAMERA_TOPIC_2 "front_camera/image_color_rect"
+#define CAMERA_TOPIC_3 "right_camera/image_color_rect"
+#define CAMERA_TOPIC_4 "back_camera/image_color_rect"
+#define CAMERA_TOPIC_5 "left_camera/image_color_rect"
 
 #define CAMERA_FRAME_1 "camera_Bottom_frame"
 #define CAMERA_FRAME_2 "camera_Front_frame"
@@ -49,10 +49,11 @@
 class Controller{
 public:
 	Controller();
+	virtual ~Controller();
 	void init();
 	void getReadings();
 	void removeCopies();
-	void mergeCopies(std::vector<tf::Vector3> &uniquePoses);
+	void mergeCopies(std::vector<tf::Vector3>& uniquePoses);
 	void updateTargetPos();
 	void updateObsPos();
 	void run();
@@ -63,14 +64,14 @@ private:
 	ros::Publisher posPub;
 	ros::Publisher red1, red2, red3, red4, red5, green1, green2, green3, green4, green5;
 	ros::Publisher obs1, obs2, obs3, obs4;
-	Tracker redTargetTracker[5];
-	Tracker greenTargetTracker[5];
-	GroundVehicle targets[10];
+	std::vector<Tracker> redTargetTracker;
+	std::vector<Tracker> greenTargetTracker;
+	std::vector<GroundVehicle> targets;
 	std::vector<tf::Vector3> uniqueRedPoses;
 	std::vector<tf::Vector3> uniqueGreenPoses;
 	std::vector<tf::Vector3> uniqueObstaclePoses;
 	ObstacleDetector obsDet;
-	GroundVehicle obstacles[4];
+	std::vector<GroundVehicle> obstacles;
 	std_msgs::Header imageHeader;
 };
 
