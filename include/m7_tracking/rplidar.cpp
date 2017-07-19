@@ -54,7 +54,7 @@ void ObstacleDetector::run()
 		tf::StampedTransform worldToLidar;
 		try
 		{
-			listener.lookupTransform(this->lidar_frame, this->world_frame, ros::Time(ros::Time(0)), worldToLidar);
+			listener.lookupTransform(this->world_frame, this->lidar_frame, ros::Time(ros::Time(0)), worldToLidar);
 		}
 		catch(tf::TransformException &e)
 		{

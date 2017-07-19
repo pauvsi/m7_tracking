@@ -24,17 +24,17 @@
 //#define CAMERA_TOPIC_4 "back_camera/image_color_rect"
 //#define CAMERA_TOPIC_5 "left_camera/image_color_rect"
 
-#define CAMERA_TOPIC_1 "bottom_camera"
-#define CAMERA_TOPIC_2 "front_camera"
-#define CAMERA_TOPIC_3 "right_camera"
-#define CAMERA_TOPIC_4 "back_camera"
-#define CAMERA_TOPIC_5 "left_camera"
+#define CAMERA_TOPIC_1 "bottom_camera/image_raw"
+#define CAMERA_TOPIC_2 "front_camera/image_raw"
+#define CAMERA_TOPIC_3 "right_camera/image_raw"
+#define CAMERA_TOPIC_4 "back_camera/image_raw"
+#define CAMERA_TOPIC_5 "left_camera/image_raw"
 
-#define CAMERA_FRAME_1 "camera_Bottom_frame"
-#define CAMERA_FRAME_2 "camera_Front_frame"
-#define CAMERA_FRAME_3 "camera_Right_frame"
-#define CAMERA_FRAME_4 "camera_Back_frame"
-#define CAMERA_FRAME_5 "camera_Left_frame"
+#define CAMERA_FRAME_1 "bottom_camera"
+#define CAMERA_FRAME_2 "front_camera"
+#define CAMERA_FRAME_3 "right_camera"
+#define CAMERA_FRAME_4 "back_camera"
+#define CAMERA_FRAME_5 "left_camera"
 
 #define REDILOWHUE 0
 #define	REDIHIGHHUE 8

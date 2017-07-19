@@ -63,10 +63,8 @@ void GroundVehicle::predict(std_msgs::Header imageHeader)
 		ROS_DEBUG_STREAM("Not Initialized!");
 		return;
 	}
-	ROS_WARN_STREAM("IN PREDICT");
 
 	double timeDiff = (imageHeader.stamp.toSec() - dataHeader.stamp.toSec());
-	ROS_WARN_STREAM("TIMEDIFF:"<<timeDiff);
 
 //TODO: Check and make sure
 	F(0,2) = F(1,3) = timeDiff;
@@ -74,8 +72,6 @@ void GroundVehicle::predict(std_msgs::Header imageHeader)
 	Q(2,2) = Q(3,3) = 0.5*timeDiff;
 	x_hat_new = F*x_hat;
 
-	ROS_WARN_STREAM("F"<<F);
-	ROS_WARN_STREAM("PRED X_HAT_NEW:\n"<<x_hat_new);
 
 //	dt = dt + timeStep;
 //	ROS_WARN_STREAM("Dt after predict:"<<dt);
@@ -102,21 +98,15 @@ void GroundVehicle::update(const Eigen::Matrix<double, 2, 1>& z, std_msgs::Heade
 	else
 		firstRun = false;
 
-	ROS_WARN_STREAM("P\n"<<P);
-	ROS_WARN_STREAM("R\n"<<R);
 
 	Eigen::Matrix<double, 2, 1> y = z - H*x_hat_new;
 
 	Eigen::Matrix<double, 2, 2> S = H*P*H.transpose() + R;
-	ROS_WARN_STREAM("S\n"<<S);
 	K = P*H.transpose()*S.inverse();
-	ROS_WARN_STREAM("K:\n"<<K);
 	x_hat = x_hat_new + K*(y);
-	ROS_WARN_STREAM("X_HAT_NEW\n"<<x_hat_new);
 	P = (I - K*H)*P;
 //	x_hat = x_hat_new;
 
-	ROS_WARN_STREAM("X_HAT: \n"<<x_hat);
 
 	t = t + imageHeader.stamp.toSec() - dataHeader.stamp.toSec() ;
 	dataHeader = imageHeader;

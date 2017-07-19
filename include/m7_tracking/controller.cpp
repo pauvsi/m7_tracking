@@ -1,32 +1,37 @@
 #include "controller.h"
 
+/*
+ * TODO: in init. Chances are i wont get all 10 roombas. What do I do?
+ */
+
 Controller::~Controller()
 {
 
 }
 Controller::Controller()
 {
-	redTargetTracker.push_back(Tracker(CAMERA_TOPIC_1, CAMERA_FRAME_1, REDILOWHUE, REDIHIGHHUE,
-								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE));
-	redTargetTracker.push_back(Tracker(CAMERA_TOPIC_2, CAMERA_FRAME_2, REDILOWHUE, REDIHIGHHUE,
-								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE));
-	redTargetTracker.push_back ( Tracker(CAMERA_TOPIC_3, CAMERA_FRAME_3, REDILOWHUE, REDIHIGHHUE,
-								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE));
-	redTargetTracker.push_back( Tracker(CAMERA_TOPIC_4, CAMERA_FRAME_4, REDILOWHUE, REDIHIGHHUE,
-								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE));
-	redTargetTracker.push_back( Tracker(CAMERA_TOPIC_5, CAMERA_FRAME_5, REDILOWHUE, REDIHIGHHUE,
-								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE));
+	ROS_INFO_STREAM("CONSTRUCTOR");
+	redTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_1, CAMERA_FRAME_1, REDILOWHUE, REDIHIGHHUE,
+								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
+	redTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_2, CAMERA_FRAME_2, REDILOWHUE, REDIHIGHHUE,
+								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
+	redTargetTracker.push_back ( *(new Tracker(CAMERA_TOPIC_3, CAMERA_FRAME_3, REDILOWHUE, REDIHIGHHUE,
+								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
+	redTargetTracker.push_back( *(new Tracker(CAMERA_TOPIC_4, CAMERA_FRAME_4, REDILOWHUE, REDIHIGHHUE,
+								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
+	redTargetTracker.push_back( *(new Tracker(CAMERA_TOPIC_5, CAMERA_FRAME_5, REDILOWHUE, REDIHIGHHUE,
+								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
 
-	greenTargetTracker.push_back( Tracker(CAMERA_TOPIC_1, CAMERA_FRAME_1, GREENILOWHUE, GREENIHIGHHUE,
-										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE));
-	greenTargetTracker.push_back( Tracker(CAMERA_TOPIC_2, CAMERA_FRAME_2, GREENILOWHUE, GREENIHIGHHUE,
-										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE));
-	greenTargetTracker.push_back( Tracker(CAMERA_TOPIC_3, CAMERA_FRAME_3, GREENILOWHUE, GREENIHIGHHUE,
-										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE));
-	greenTargetTracker.push_back( Tracker(CAMERA_TOPIC_4, CAMERA_FRAME_4, GREENILOWHUE, GREENIHIGHHUE,
-										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE));
-	greenTargetTracker.push_back( Tracker(CAMERA_TOPIC_5, CAMERA_FRAME_5, GREENILOWHUE, GREENIHIGHHUE,
-										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE));
+	greenTargetTracker.push_back( *(new Tracker(CAMERA_TOPIC_1, CAMERA_FRAME_1, GREENILOWHUE, GREENIHIGHHUE,
+										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
+	greenTargetTracker.push_back( *(new Tracker(CAMERA_TOPIC_2, CAMERA_FRAME_2, GREENILOWHUE, GREENIHIGHHUE,
+										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
+	greenTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_3, CAMERA_FRAME_3, GREENILOWHUE, GREENIHIGHHUE,
+										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
+	greenTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_4, CAMERA_FRAME_4, GREENILOWHUE, GREENIHIGHHUE,
+										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
+	greenTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_5, CAMERA_FRAME_5, GREENILOWHUE, GREENIHIGHHUE,
+										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
 
 
 	// INITIALIZE KALMAN FILTERS
@@ -61,8 +66,23 @@ Controller::Controller()
 //TODO: check if initialization is right!!
 void Controller::init()
 {
+	ROS_INFO_STREAM("INIT");
+
+
 	getReadings();
+	int t=0;
+	while(uniqueRedPoses.size() < 5 || uniqueGreenPoses.size() < 5 || t < 1000)
+		{
+			t++;
+			getReadings();
+		}
+	std::exit(0);
 	removeCopies();
+	Eigen::Matrix<double, 4, 1> m;
+	m << uniqueRedPoses[0].getX(), uniqueRedPoses[0].getY(), 0, 0;
+	targets[0].init(imageHeader.stamp.toSec(), m);
+	ROS_INFO_STREAM("TARGETS INITIALIZED");
+
 
 	for(int i=0; i<5; i++)
 	{
@@ -72,12 +92,16 @@ void Controller::init()
 //		scalars[0] = uniqueGreenPoses[i].getX(); scalars[1] = uniqueGreenPoses[i].getY();
 		targets[i].init(imageHeader.stamp.toSec(), Eigen::Matrix<double, 4, 1>  (uniqueRedPoses[i].getX(), uniqueRedPoses[i].getY(), 0, 0));
 		targets[i+5].init(imageHeader.stamp.toSec(), Eigen::Matrix<double, 4, 1> (uniqueGreenPoses[i].getX(), uniqueGreenPoses[i].getY(), 0, 0));
-	}
+		ROS_INFO_STREAM("TARGETS INITIALIZED");
 
+	}
+	ROS_INFO_STREAM("TARGETS INITIALIZED");
 	for(int i=0; i<4; ++i)
 	{
 		obstacles[i].init(imageHeader.stamp.toSec(), Eigen::Matrix<double, 4, 1> ( uniqueObstaclePoses[i].getX(), uniqueObstaclePoses[i].getY(), 0,0));
 	}
+
+	ROS_INFO_STREAM("init done");
 }
 
 void Controller::getReadings()
@@ -94,7 +118,13 @@ void Controller::getReadings()
 //	}
 
 	uniqueRedPoses.clear(); uniqueGreenPoses.clear(); uniqueObstaclePoses.clear();
-
+/*
+	for(int i=0; i<5; ++i)
+	{
+		redTargetTracker[i].run();
+		greenTargetTracker[i].run();
+	}
+*/
 	for(int i=0; i<5; ++i)
 	{
 		if(redTargetTracker[i].curImgOlder)
@@ -117,6 +147,8 @@ void Controller::getReadings()
 	}
 
 	this->imageHeader = redTargetTracker[4].getHeader();
+
+	//ROS_INFO_STREAM("Get Readings Done! Size:"<<uniqueRedPoses.size());
 }
 
 //returns true if the first argument goes before the second argument in the strict weak ordering
@@ -194,6 +226,8 @@ void Controller::removeCopies()
 
 	mergeCopies(uniqueRedPoses);
 	mergeCopies(uniqueGreenPoses);
+
+	ROS_INFO_STREAM("removeCopies done");
 }
 
 void Controller::updateTargetPos()

@@ -79,9 +79,9 @@ Tracker::Tracker(std::string cameraTopic, std::string cameraFrame, int target_Lo
 
 	this->cameraSub = it.subscribeCamera(this->getCameraTopic(), 2, &Tracker::cameraCallback, this);
 
-	ROS_DEBUG_STREAM(cameraSub.getInfoTopic());
-	ROS_DEBUG_STREAM(cameraSub.getTopic());
-	ROS_DEBUG_STREAM(cameraSub.getTransport());
+	ROS_WARN_STREAM(cameraSub.getInfoTopic());
+	ROS_WARN_STREAM(cameraSub.getTopic());
+	ROS_WARN_STREAM(cameraSub.getTransport());
 
 	currentImgTime = DBL_MIN;
 	lastImgTime = DBL_MIN;
@@ -89,7 +89,7 @@ Tracker::Tracker(std::string cameraTopic, std::string cameraFrame, int target_Lo
 
 
 
-	ROS_DEBUG_STREAM("Done");
+	ROS_WARN_STREAM("Done");
 }
 
 void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam)
@@ -99,7 +99,7 @@ void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor
 	currentImgTime = img->header.stamp.toNSec();
 	if(currentImgTime < lastImgTime)
 	{
-		ROS_DEBUG_STREAM("GOT OLDER IMAGE!");
+		ROS_INFO_STREAM("GOT OLDER IMAGE!");
 		currentImgTime = lastImgTime;
 		curImgOlder = true;
 	}
@@ -107,7 +107,7 @@ void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor
 	{
 		curImgOlder = false;
 	}
-	ROS_DEBUG_STREAM("Listening To Camera: In callback");
+	ROS_WARN_STREAM("Listening To Camera: In callback");
 
 	//set the K and D matrices
 	this->setK(get3x3FromVector(cam->K));
