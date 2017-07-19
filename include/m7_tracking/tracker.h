@@ -34,12 +34,14 @@
 
 #define CANNY_THRESHOLD 100
 #define ROOMBA_HEIGHT 0.09
-#define DEFAULT_CAMERA_TOPIC "/camera/image_color_rect"
+#define DEFAULT_CAMERA_TOPIC "bottom_camera/image_raw"
 #define DEFAULT_ODOM_FRAME_NAME "odom"
-#define DEFAULT_CAMERA_FRAME_NAME "camera_frame"
+#define DEFAULT_CAMERA_FRAME_NAME "bottom_camera"
 //#define DEFAULT_COM_FRAME_NAME "base_link"
 #define DEFAULT_WORLD_FRAME_NAME "world"
 #define FISHEYE_DISTORTION false
+
+tf::TransformListener* listener;
 
 class Tracker
 {
@@ -79,7 +81,12 @@ public:
 	}
 
 	std::vector<tf::Vector3> getPoses(){
-		return worldRoombaPosition;
+		std::vector<tf::Vector3> result;
+		for(auto& e: worldRoombaPosition)
+			result.push_back(e);
+		worldRoombaPosition.clear();
+
+		return result;
 	}
 
 protected:
@@ -103,7 +110,7 @@ protected:
 	std_msgs::Header imageHeader;
 	cv::Mat inputImg;
 
-	tf::TransformListener* listener;
+//	tf::TransformListener* listener;
 
 
 

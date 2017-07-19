@@ -18,11 +18,17 @@
 #include "ground_vehicle.h"
 #include "rplidar.h"
 
-#define CAMERA_TOPIC_1 "bottom_camera/image_color_rect"
-#define CAMERA_TOPIC_2 "front_camera/image_color_rect"
-#define CAMERA_TOPIC_3 "right_camera/image_color_rect"
-#define CAMERA_TOPIC_4 "back_camera/image_color_rect"
-#define CAMERA_TOPIC_5 "left_camera/image_color_rect"
+//#define CAMERA_TOPIC_1 "bottom_camera/image_color_rect"
+//#define CAMERA_TOPIC_2 "front_camera/image_color_rect"
+//#define CAMERA_TOPIC_3 "right_camera/image_color_rect"
+//#define CAMERA_TOPIC_4 "back_camera/image_color_rect"
+//#define CAMERA_TOPIC_5 "left_camera/image_color_rect"
+
+#define CAMERA_TOPIC_1 "bottom_camera"
+#define CAMERA_TOPIC_2 "front_camera"
+#define CAMERA_TOPIC_3 "right_camera"
+#define CAMERA_TOPIC_4 "back_camera"
+#define CAMERA_TOPIC_5 "left_camera"
 
 #define CAMERA_FRAME_1 "camera_Bottom_frame"
 #define CAMERA_FRAME_2 "camera_Front_frame"

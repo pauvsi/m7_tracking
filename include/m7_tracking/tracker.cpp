@@ -87,6 +87,8 @@ Tracker::Tracker(std::string cameraTopic, std::string cameraFrame, int target_Lo
 	lastImgTime = DBL_MIN;
 	curImgOlder = false;
 
+
+
 	ROS_DEBUG_STREAM("Done");
 }
 
@@ -97,6 +99,7 @@ void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor
 	currentImgTime = img->header.stamp.toNSec();
 	if(currentImgTime < lastImgTime)
 	{
+		ROS_DEBUG_STREAM("GOT OLDER IMAGE!");
 		currentImgTime = lastImgTime;
 		curImgOlder = true;
 	}
@@ -145,10 +148,10 @@ void Tracker::displayTargets()
 		cv::Mat display = this->inputImg;
 		for(int i=0; i<imgRoombaPoses.size(); ++i)
 		{
-			cv::circle(display,Point(imgRoombaPoses[i].x,imgRoombaPoses[i].y),5,Scalar(0,255,0),2);
+			cv::circle(display,Point(imgRoombaPoses[i].x,imgRoombaPoses[i].y),5,Scalar(0,255,0),5);
 		}
 
-		imgRoombaPoses.clear();
+//		imgRoombaPoses.clear();
 
 	    cv::imshow("RoombaPoses Targets", display);
 	    cv::waitKey(5);
@@ -183,6 +186,7 @@ void Tracker::createTrackBars()
 
 void Tracker::run()
 {
+//	createTrackBars();
 
 	cv::Mat imgHSV;
 	cv::Mat imgThresholded;
@@ -192,10 +196,10 @@ void Tracker::run()
 	cv::inRange(imgHSV, Scalar(target_LowHue, target_LowSat, target_LowValue),
 						Scalar(target_HighHue, target_HighSat, target_HighValue), imgThresholded);
 
-/*	cv::imshow("Thresholded image", imgThresholded);
-	cv::waitKey(30);
-	return;
-*/
+//	cv::imshow("Thresholded image", imgThresholded);
+//	cv::waitKey(30);
+//	return;
+
 
 	//Remove small objects from the foreground (Morphological Opening)
 	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(8,8)));
@@ -228,9 +232,12 @@ void Tracker::run()
 		if(oMoments[i].m00 > 500)  //******************************************** Check Size **********************
 		{
 			imgRoombaPoses.push_back(Point2f(oMoments[i].m10 / oMoments[i].m00 , oMoments[i].m01 / oMoments[i].m00));
-			ROS_WARN_STREAM("Position of"<< i+1<< "Roomba is: x:" << imgRoombaPoses[i].x << " y:"<< imgRoombaPoses[i].y << std::endl);
+			//ROS_WARN_STREAM("SIZE:"<<oMoments[i].m00<<"M10 (x):"<<oMoments[i].m10<<" M01(y):"<<oMoments[i].m01);
+			//ROS_WARN_STREAM("Position of"<< i+1<< "Roomba is: x:" << imgRoombaPoses[i].x << " y:"<< imgRoombaPoses[i].y <<" SIZE:"<<oMoments[i].m00<< std::endl);
 		}
 	}
+
+//	ROS_WARN_STREAM("IRP s:"<<imgRoombaPoses.size());
 
 
 		displayTargets();
@@ -247,13 +254,14 @@ void Tracker::removeOutofBounds()
 {
 	for(int  i=0; i < worldRoombaPosition.size(); ++i)
 	{
-		if((worldRoombaPosition[i].getX() >= -10.0 && worldRoombaPosition[i].getX() <= 10.00) &&
-		   (worldRoombaPosition[i].getY() >= -10.0 && worldRoombaPosition[i].getY() <=10.00))
+		if((worldRoombaPosition[i].getX() >= -9.65 && worldRoombaPosition[i].getX() <= 9.65) &&
+		   (worldRoombaPosition[i].getY() >= -9.65 && worldRoombaPosition[i].getY() <= 9.65))
 		{
 
 		}
 		else
 		{
+			ROS_WARN_STREAM("REMOVING:"<<worldRoombaPosition[i].getX()<<" , "<<worldRoombaPosition[i].getY());
 			worldRoombaPosition.erase(worldRoombaPosition.begin()+i);
 		}
 	}
@@ -263,17 +271,18 @@ void Tracker::getWorldPosition()
 {
 //	tf::TransformListener listener;
 	tf::StampedTransform worldToCam;
-	listener = new tf::TransformListener();
+//	listener = new tf::TransformListener();
 
 	//NOTE: If you multiply WorldToCam with a pos in world frame, then you'll get a pos in cam coord frame
 	try
 	{
-		listener->lookupTransform(this->camera_frame, this->world_frame, ros::Time(ros::Time(0)), worldToCam);
+		listener->lookupTransform(this->world_frame, this->camera_frame, ros::Time(ros::Time(0)), worldToCam);
 	}
 	catch(tf::TransformException &e)
 	{
 		ROS_WARN_STREAM(e.what());
 	}
+
 
 	// [u v]
 //	vector<cv::Point2f> undistortedPoses;
@@ -294,10 +303,12 @@ void Tracker::getWorldPosition()
 		cvPoints.push_back((cv::Mat_<float>(3, 1) << e.x, e.y, 1));
 	}
 
+//	ROS_WARN_STREAM("cvPonts size:"<<imgRoombaPoses.size());
+	imgRoombaPoses.clear();
 	std::vector<cv::Mat_<float> > projectedPoses;
 	cv::Mat invK = K.inv();
 
-	for(auto e:projectedPoses)
+	for(auto e:cvPoints)
 	{
 		projectedPoses.push_back((invK*e));
 	}
@@ -325,6 +336,8 @@ void Tracker::getWorldPosition()
 	tf::Vector3 lineVector; //vector along line [a b c]
 	double lineParameter; // parameter t for line vector
 
+
+	worldRoombaPosition.clear(); //TODO: MAYBE REMOVE
 	for(auto e: worldProjectedPoses)
 	{
 		//r = r. + tv
@@ -343,27 +356,29 @@ void Tracker::getWorldPosition()
 
 	removeOutofBounds();
 
+
 	for(int i = 0; i<worldRoombaPosition.size(); ++i)
 	{
-		ROS_WARN_STREAM("\n Roomba "<<i+1<<" World Position: "<< worldRoombaPosition[i]);
+		ROS_WARN_STREAM("\n Roomba "<<i+1<<" World Position: "<< worldRoombaPosition[i].getX()<<" "<<worldRoombaPosition[i].getY());
 	}
 
 
-	tf::TransformBroadcaster br;
-	tf::Transform transform;
-	tf::Quaternion q;
-	q.setRPY(0,0,0);
-	transform.setRotation(q);
 
-	for(int i=0; i<worldRoombaPosition.size(); ++i)
-	{
-		transform.setOrigin(worldRoombaPosition[i]);
-
-
-//		br.sendTransform(tf::StampedTransform(transform, imageHeader.stamp, this->world_frame,
-//						std::string(this->camera_frame + " Roomba " + boost::lexical_cast<std::string>(i))));
-//		br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), this->world_frame,
-//								buffer));
-	}
+//	tf::TransformBroadcaster br;
+//	tf::Transform transform;
+//	tf::Quaternion q;
+//	q.setRPY(0,0,0);
+//	transform.setRotation(q);
+//
+//	for(int i=0; i<worldRoombaPosition.size(); ++i)
+//	{
+//		transform.setOrigin(worldRoombaPosition[i]);
+//
+//
+////		br.sendTransform(tf::StampedTransform(transform, imageHeader.stamp, this->world_frame,
+////						std::string(this->camera_frame + " Roomba " + boost::lexical_cast<std::string>(i))));
+////		br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), this->world_frame,
+////								buffer));
+//	}
 
 }

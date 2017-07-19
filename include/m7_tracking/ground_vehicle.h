@@ -20,7 +20,7 @@
 #include <std_msgs/Header.h>
 
 #define ROOMBA_HEIGHT 0.09
-#define TIME_STEP 0.1
+#define TIME_STEP 1.0 //0.1
 
 class GroundVehicle
 {
@@ -34,11 +34,11 @@ public:
 
 	GroundVehicle();
 	void init(double t0, const Eigen::Matrix<double, 4, 1>& x0);
-	void predict();
+	void predict(std_msgs::Header imageHeader);
 	void update(const Eigen::Matrix<double, 2, 1>& y, std_msgs::Header imageHeader);
 
-	geometry_msgs::PoseStamped getPoseStamped();
-	geometry_msgs::PoseWithCovarianceStamped getPoseWithCovariance();
+	geometry_msgs::PoseStamped getPoseStamped(std_msgs::Header imageHeader);
+	geometry_msgs::PoseWithCovarianceStamped getPoseWithCovariance(std_msgs::Header imageHeader);
 
 private:
 	 /**
@@ -63,6 +63,8 @@ private:
 	double timeStep;
 	//Time since Last y
 	double dt;
+
+	bool firstRun;
 
 	//Identity
 	Eigen::Matrix4d I;

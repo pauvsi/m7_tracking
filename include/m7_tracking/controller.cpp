@@ -70,13 +70,13 @@ void Controller::init()
 //		targets[i].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1>::Matrix(scalars));
 
 //		scalars[0] = uniqueGreenPoses[i].getX(); scalars[1] = uniqueGreenPoses[i].getY();
-		targets[i].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1>  (uniqueRedPoses[i].getX(), uniqueRedPoses[i].getY(), 0, 0));
-		targets[i+5].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1> (uniqueGreenPoses[i].getX(), uniqueGreenPoses[i].getY(), 0, 0));
+		targets[i].init(imageHeader.stamp.toSec(), Eigen::Matrix<double, 4, 1>  (uniqueRedPoses[i].getX(), uniqueRedPoses[i].getY(), 0, 0));
+		targets[i+5].init(imageHeader.stamp.toSec(), Eigen::Matrix<double, 4, 1> (uniqueGreenPoses[i].getX(), uniqueGreenPoses[i].getY(), 0, 0));
 	}
 
 	for(int i=0; i<4; ++i)
 	{
-		obstacles[i].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1> ( uniqueObstaclePoses[i].getX(), uniqueObstaclePoses[i].getY(), 0,0));
+		obstacles[i].init(imageHeader.stamp.toSec(), Eigen::Matrix<double, 4, 1> ( uniqueObstaclePoses[i].getX(), uniqueObstaclePoses[i].getY(), 0,0));
 	}
 }
 
@@ -209,7 +209,7 @@ void Controller::updateTargetPos()
 //TODO: THIS PREDICT WITH THE PREDICTION MIGHT BE A PROBLEM
 	//RED
 	for(int i=0; i<5; ++i)
-		currPose[i] = targets[i].getPoseStamped();
+		currPose[i] = targets[i].getPoseStamped(imageHeader);
 
 	for(int i=0; i<5; ++i)
 	{
@@ -243,7 +243,7 @@ void Controller::updateTargetPos()
 
 	//GREEN
 	for(int i=0; i<5; ++i)
-		currPose[i] = targets[i+5].getPoseStamped();
+		currPose[i] = targets[i+5].getPoseStamped(imageHeader);
 
 	for(int i=0; i<5; ++i)
 	{
@@ -287,7 +287,7 @@ void Controller::updateObsPos()
 
 		//Obstacles
 		for(int i=0; i<4; ++i)
-			currPose[i] = targets[i].getPoseStamped();
+			currPose[i] = targets[i].getPoseStamped(imageHeader);
 
 		for(int i=0; i<4; ++i)
 			{
@@ -322,21 +322,21 @@ void Controller::updateObsPos()
 
 void Controller::publishAll()
 {
-	red1.publish(targets[0].getPoseWithCovariance());
-	red2.publish(targets[1].getPoseWithCovariance());
-	red3.publish(targets[2].getPoseWithCovariance());
-	red4.publish(targets[3].getPoseWithCovariance());
-	red5.publish(targets[4].getPoseWithCovariance());
-	green1.publish(targets[5].getPoseWithCovariance());
-	green2.publish(targets[6].getPoseWithCovariance());
-	green3.publish(targets[7].getPoseWithCovariance());
-	green4.publish(targets[8].getPoseWithCovariance());
-	green5.publish(targets[9].getPoseWithCovariance());
+	red1.publish(targets[0].getPoseWithCovariance(imageHeader));
+	red2.publish(targets[1].getPoseWithCovariance(imageHeader));
+	red3.publish(targets[2].getPoseWithCovariance(imageHeader));
+	red4.publish(targets[3].getPoseWithCovariance(imageHeader));
+	red5.publish(targets[4].getPoseWithCovariance(imageHeader));
+	green1.publish(targets[5].getPoseWithCovariance(imageHeader));
+	green2.publish(targets[6].getPoseWithCovariance(imageHeader));
+	green3.publish(targets[7].getPoseWithCovariance(imageHeader));
+	green4.publish(targets[8].getPoseWithCovariance(imageHeader));
+	green5.publish(targets[9].getPoseWithCovariance(imageHeader));
 
-	obs1.publish(obstacles[0].getPoseWithCovariance());
-	obs2.publish(obstacles[1].getPoseWithCovariance());
-	obs3.publish(obstacles[2].getPoseWithCovariance());
-	obs4.publish(obstacles[3].getPoseWithCovariance());
+	obs1.publish(obstacles[0].getPoseWithCovariance(imageHeader));
+	obs2.publish(obstacles[1].getPoseWithCovariance(imageHeader));
+	obs3.publish(obstacles[2].getPoseWithCovariance(imageHeader));
+	obs4.publish(obstacles[3].getPoseWithCovariance(imageHeader));
 }
 
 

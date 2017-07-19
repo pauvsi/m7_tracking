@@ -23,53 +23,65 @@ GroundVehicle::GroundVehicle()
 	this->timeStep = TIME_STEP;
 	dt = TIME_STEP;
 
+
 	this->F.setIdentity();
 		F(0,2) = F(1, 3) = dt;
 
-	this->P.setConstant(10000);
+	//this->P.setConstant(10000);
+	P(0,0) = P(1,1) = P(2,2) = P(3,3) = 10000;
+
 	this->Q.setZero();
 		Q(0,0) = Q(1,1) = 0.1*dt;
 		Q(2,2) = Q(3,3) = 0.5*dt;
 
-	this->R.setConstant(0.25);
+	//this->R.setConstant(0.25);
+	R(0,0) = R(1,1) = 0.25;
+
 	this->H.setZero();
-		H(0,0) = 1; H(1,1) = 1;
+	H(0,0) = 1; H(1,1) = 1;
 
 	this->I.setIdentity();
 
+
 	initialized = false;
+	firstRun = true;
 }
 
 void GroundVehicle::init(double t0, const Eigen::Matrix<double, 4, 1>& x0)
 {
-	x_hat = x0;
+	x_hat = x_hat_new = x0;
 	this->t0 = t0;
 	t = t0;
 	initialized = true;
 
 }
 
-void GroundVehicle::predict()
+void GroundVehicle::predict(std_msgs::Header imageHeader)
 {
 	if(!initialized)
 	{
 		ROS_DEBUG_STREAM("Not Initialized!");
 		return;
 	}
+	ROS_WARN_STREAM("IN PREDICT");
+
+	double timeDiff = (imageHeader.stamp.toSec() - dataHeader.stamp.toSec());
+	ROS_WARN_STREAM("TIMEDIFF:"<<timeDiff);
 
 //TODO: Check and make sure
-	F(0,2) = F(1,3) = dt;
-	Q(0,0) = Q(1,1) = 0.1*dt;
-	Q(2,2) = Q(3,3) = 0.5*dt;
+	F(0,2) = F(1,3) = timeDiff;
+	Q(0,0) = Q(1,1) = 0.1*timeDiff;
+	Q(2,2) = Q(3,3) = 0.5*timeDiff;
 	x_hat_new = F*x_hat;
-	if(dt == timeStep)
-		P = F*P*F.transpose() + Q;
 
-	dt = dt + timeStep;
+	ROS_WARN_STREAM("F"<<F);
+	ROS_WARN_STREAM("PRED X_HAT_NEW:\n"<<x_hat_new);
 
+//	dt = dt + timeStep;
+//	ROS_WARN_STREAM("Dt after predict:"<<dt);
 }
 
-void GroundVehicle::update(const Eigen::Matrix<double, 2, 1>& y, std_msgs::Header imageHeader)
+void GroundVehicle::update(const Eigen::Matrix<double, 2, 1>& z, std_msgs::Header imageHeader)
 {
 	if(!initialized)
 	{
@@ -77,27 +89,48 @@ void GroundVehicle::update(const Eigen::Matrix<double, 2, 1>& y, std_msgs::Heade
 		return;
 	}
 
+
+	if(!firstRun)
+	{
+		double timeDiff = (imageHeader.stamp.toSec() - dataHeader.stamp.toSec());
+		F(0,2) = F(1,3) = timeDiff;
+		Q(0,0) = Q(1,1) = 0.1*timeDiff;
+		Q(2,2) = Q(3,3) = 0.5*timeDiff;
+		x_hat_new = F*x_hat;
+		P = F*P*F.transpose() + Q;
+	}
+	else
+		firstRun = false;
+
+	ROS_WARN_STREAM("P\n"<<P);
+	ROS_WARN_STREAM("R\n"<<R);
+
+	Eigen::Matrix<double, 2, 1> y = z - H*x_hat_new;
+
 	Eigen::Matrix<double, 2, 2> S = H*P*H.transpose() + R;
+	ROS_WARN_STREAM("S\n"<<S);
 	K = P*H.transpose()*S.inverse();
-	x_hat_new += K*(y - H*x_hat_new);
+	ROS_WARN_STREAM("K:\n"<<K);
+	x_hat = x_hat_new + K*(y);
+	ROS_WARN_STREAM("X_HAT_NEW\n"<<x_hat_new);
 	P = (I - K*H)*P;
-	x_hat = x_hat_new;
+//	x_hat = x_hat_new;
 
+	ROS_WARN_STREAM("X_HAT: \n"<<x_hat);
 
-	t = t + imageHeader.stamp.sec - dataHeader.stamp.sec ;
-	dt = timeStep; //----------------
+	t = t + imageHeader.stamp.toSec() - dataHeader.stamp.toSec() ;
 	dataHeader = imageHeader;
 }
 
-geometry_msgs::PoseStamped GroundVehicle::getPoseStamped()
+geometry_msgs::PoseStamped GroundVehicle::getPoseStamped(std_msgs::Header imageHeader)
 {
 	//TODO: predict then give it, or don't predict?
-	this->predict();
+	this->predict(imageHeader);
 	geometry_msgs::PoseStamped pose;// = new geometry_msgs::PoseStamped(x_hat[0], x_hat[1], 0);
 	//TODO: Set ros time, to the time of the image
 	pose.header = dataHeader;
-	pose.header.stamp.sec = dataHeader.stamp.sec + dt-timeStep;
-	pose.header.stamp.nsec = dataHeader.stamp.nsec + (dt-timeStep)*pow10(9);
+	pose.header.stamp.sec = imageHeader.stamp.nsec - dataHeader.stamp.nsec;
+	pose.header.stamp.nsec = imageHeader.stamp.nsec - dataHeader.stamp.nsec;
 	pose.pose.position.x = x_hat_new(0, 0);
 	pose.pose.position.y = x_hat_new(1, 0);
 	pose.pose.position.z = ROOMBA_HEIGHT;
@@ -109,13 +142,13 @@ geometry_msgs::PoseStamped GroundVehicle::getPoseStamped()
 	return pose;
 }
 
-geometry_msgs::PoseWithCovarianceStamped GroundVehicle::getPoseWithCovariance()
+geometry_msgs::PoseWithCovarianceStamped GroundVehicle::getPoseWithCovariance(std_msgs::Header imageHeader)
 {
-	this->predict();
+	this->predict(imageHeader);
 	geometry_msgs::PoseWithCovarianceStamped pose;
 	pose.header = dataHeader;
-	pose.header.stamp.sec = dataHeader.stamp.sec + dt-timeStep;
-	pose.header.stamp.nsec = dataHeader.stamp.nsec + (dt-timeStep)*pow10(9);
+	pose.header.stamp.sec = imageHeader.stamp.sec - dataHeader.stamp.sec;
+	pose.header.stamp.nsec = imageHeader.stamp.nsec - dataHeader.stamp.nsec;
 	//	pose.header.stamp =ros::Time(ros::Time(0));
 	pose.pose.pose.position.x = x_hat_new(0, 0);
 	pose.pose.pose.position.y = x_hat_new(1, 0);
