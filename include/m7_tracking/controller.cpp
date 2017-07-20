@@ -1,5 +1,5 @@
 #include "controller.h"
-
+#include <math.h>
 /*
  * TODO: in init. Chances are i wont get all 10 roombas. What do I do?
  */
@@ -11,36 +11,36 @@ Controller::~Controller()
 Controller::Controller()
 {
 	ROS_INFO_STREAM("CONSTRUCTOR");
-	redTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_1, CAMERA_FRAME_1, REDILOWHUE, REDIHIGHHUE,
+	redTargetTracker.push_back((new Tracker(CAMERA_TOPIC_1, CAMERA_FRAME_1, REDILOWHUE, REDIHIGHHUE,
 								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
-	redTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_2, CAMERA_FRAME_2, REDILOWHUE, REDIHIGHHUE,
-								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
-	redTargetTracker.push_back ( *(new Tracker(CAMERA_TOPIC_3, CAMERA_FRAME_3, REDILOWHUE, REDIHIGHHUE,
-								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
-	redTargetTracker.push_back( *(new Tracker(CAMERA_TOPIC_4, CAMERA_FRAME_4, REDILOWHUE, REDIHIGHHUE,
-								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
-	redTargetTracker.push_back( *(new Tracker(CAMERA_TOPIC_5, CAMERA_FRAME_5, REDILOWHUE, REDIHIGHHUE,
-								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
+//	redTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_2, CAMERA_FRAME_2, REDILOWHUE, REDIHIGHHUE,
+//								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
+//	redTargetTracker.push_back ( *(new Tracker(CAMERA_TOPIC_3, CAMERA_FRAME_3, REDILOWHUE, REDIHIGHHUE,
+//								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
+//	redTargetTracker.push_back( *(new Tracker(CAMERA_TOPIC_4, CAMERA_FRAME_4, REDILOWHUE, REDIHIGHHUE,
+//								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
+//	redTargetTracker.push_back( *(new Tracker(CAMERA_TOPIC_5, CAMERA_FRAME_5, REDILOWHUE, REDIHIGHHUE,
+//								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
 
-	greenTargetTracker.push_back( *(new Tracker(CAMERA_TOPIC_1, CAMERA_FRAME_1, GREENILOWHUE, GREENIHIGHHUE,
+	greenTargetTracker.push_back( (new Tracker(CAMERA_TOPIC_1, CAMERA_FRAME_1, GREENILOWHUE, GREENIHIGHHUE,
 										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
-	greenTargetTracker.push_back( *(new Tracker(CAMERA_TOPIC_2, CAMERA_FRAME_2, GREENILOWHUE, GREENIHIGHHUE,
-										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
-	greenTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_3, CAMERA_FRAME_3, GREENILOWHUE, GREENIHIGHHUE,
-										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
-	greenTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_4, CAMERA_FRAME_4, GREENILOWHUE, GREENIHIGHHUE,
-										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
-	greenTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_5, CAMERA_FRAME_5, GREENILOWHUE, GREENIHIGHHUE,
-										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
+//	greenTargetTracker.push_back( *(new Tracker(CAMERA_TOPIC_2, CAMERA_FRAME_2, GREENILOWHUE, GREENIHIGHHUE,
+//										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
+//	greenTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_3, CAMERA_FRAME_3, GREENILOWHUE, GREENIHIGHHUE,
+//										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
+//	greenTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_4, CAMERA_FRAME_4, GREENILOWHUE, GREENIHIGHHUE,
+//										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
+//	greenTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_5, CAMERA_FRAME_5, GREENILOWHUE, GREENIHIGHHUE,
+//										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
 
 
 	// INITIALIZE KALMAN FILTERS
 	//0-4 for red 5-9 green
 	for(int i=0; i<10; ++i)
-		targets.push_back( GroundVehicle());
+		targets.push_back( new GroundVehicle());
 
 	for(int i=0; i<5; ++i)
-		obstacles.push_back( GroundVehicle());
+		obstacles.push_back( new GroundVehicle());
 
 	red1 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("roomba/roomba1", 1);
 	red2 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("roomba/roomba2", 1);
@@ -58,7 +58,10 @@ Controller::Controller()
 	obs3 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("obstacle/obstacle3", 1);
 	obs4 = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("obstacle/obstacle4", 1);
 
-	this->init();
+	initialized = false;
+	redTargetCtr = greenTargetCtr = obsCtr = 0;
+	fullInit = false;
+//	this->init();
 
 
 }
@@ -67,42 +70,205 @@ Controller::Controller()
 void Controller::init()
 {
 	ROS_INFO_STREAM("INIT");
-
+	//TODO: IF IM IN THIS FUNCTION, I CANT GO TO A CALLBACK?
 
 	getReadings();
-	int t=0;
-	while(uniqueRedPoses.size() < 5 || uniqueGreenPoses.size() < 5 || t < 1000)
-		{
-			t++;
-			getReadings();
-		}
-	std::exit(0);
+
 	removeCopies();
-	Eigen::Matrix<double, 4, 1> m;
-	m << uniqueRedPoses[0].getX(), uniqueRedPoses[0].getY(), 0, 0;
-	targets[0].init(imageHeader.stamp.toSec(), m);
-	ROS_INFO_STREAM("TARGETS INITIALIZED");
+	if(uniqueRedPoses.size()==0 && uniqueGreenPoses.size() == 0)
+		return;
 
 
-	for(int i=0; i<5; i++)
+	for(auto& e:uniqueRedPoses)
 	{
-//		double scalars[4]; scalars[0] = uniqueRedPoses[i].getX(); scalars[1] = uniqueRedPoses[i].getY(); scalars[2] = scalars[3] = 0;
-//		targets[i].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1>::Matrix(scalars));
-
-//		scalars[0] = uniqueGreenPoses[i].getX(); scalars[1] = uniqueGreenPoses[i].getY();
-		targets[i].init(imageHeader.stamp.toSec(), Eigen::Matrix<double, 4, 1>  (uniqueRedPoses[i].getX(), uniqueRedPoses[i].getY(), 0, 0));
-		targets[i+5].init(imageHeader.stamp.toSec(), Eigen::Matrix<double, 4, 1> (uniqueGreenPoses[i].getX(), uniqueGreenPoses[i].getY(), 0, 0));
-		ROS_INFO_STREAM("TARGETS INITIALIZED");
-
+		(*targets[redTargetCtr]).init(imageHeader, Eigen::Matrix<double, 4, 1> (e.getX(), e.getY(), 0, 0));
+		++redTargetCtr;
 	}
-	ROS_INFO_STREAM("TARGETS INITIALIZED");
-	for(int i=0; i<4; ++i)
+
+	for(auto& e:uniqueGreenPoses)
 	{
-		obstacles[i].init(imageHeader.stamp.toSec(), Eigen::Matrix<double, 4, 1> ( uniqueObstaclePoses[i].getX(), uniqueObstaclePoses[i].getY(), 0,0));
+		(*targets[greenTargetCtr+5]).init(imageHeader, Eigen::Matrix<double, 4, 1> (e.getX(), e.getY(), 0, 0));
+		++greenTargetCtr;
 	}
+
+//	for(int i=0; i<5; i++)
+//	{
+////		double scalars[4]; scalars[0] = uniqueRedPoses[i].getX(); scalars[1] = uniqueRedPoses[i].getY(); scalars[2] = scalars[3] = 0;
+////		targets[i].init(imageHeader.stamp.sec, Eigen::Matrix<double, 4, 1>::Matrix(scalars));
+//
+////		scalars[0] = uniqueGreenPoses[i].getX(); scalars[1] = uniqueGreenPoses[i].getY();
+//		(*targets[i]).init(imageHeader.stamp.toSec(), Eigen::Matrix<double, 4, 1>  (uniqueRedPoses[i].getX(), uniqueRedPoses[i].getY(), 0, 0));
+//		(*targets[i+5]).init(imageHeader.stamp.toSec(), Eigen::Matrix<double, 4, 1> (uniqueGreenPoses[i].getX(), uniqueGreenPoses[i].getY(), 0, 0));
+//		ROS_INFO_STREAM("TARGETS INITIALIZED");
+//
+//	}
+
+	ROS_INFO_STREAM("TARGETS INITIALIZED");
+//	for(int i=0; i<4; ++i)
+//	{
+//		(*obstacles[i]).init(imageHeader.stamp.toSec(), Eigen::Matrix<double, 4, 1> ( uniqueObstaclePoses[i].getX(), uniqueObstaclePoses[i].getY(), 0,0));
+//	}
 
 	ROS_INFO_STREAM("init done");
+	ROS_WARN_STREAM("ctrs:"<<redTargetCtr<<" "<<greenTargetCtr);
+	initialized = true;
 }
+
+void Controller::updateAndInit()
+{
+	getReadings();
+	removeCopies();
+	if(uniqueRedPoses.size()==0 && uniqueGreenPoses.size() == 0)
+		return;
+
+	//Go through unique poses, find matching positions and update the Kalman Filters
+	//What if I don't get a measurement for a roomba? ANS: Find out through empty list
+
+	float min = FLT_MAX;
+	float threshold = 1.0;
+	float displacement;
+	bool flag = false;
+	std::vector<geometry_msgs::PoseStamped> currPose;
+	int posIndex, targetIndex;
+
+	ROS_INFO_STREAM("Time:"<<imageHeader.stamp.toSec());
+
+//TODO: THIS PREDICT WITH THE PREDICTION MIGHT BE A PROBLEM
+	//RED
+	for(int i=0; i<redTargetCtr; ++i)
+	{
+		currPose.push_back((*targets[i]).getPoseStamped(imageHeader));
+		ROS_INFO_STREAM("Pushed:"<<currPose[i].pose.position.x<<currPose[i].pose.position.y);
+		if(std::isnan(currPose[i].pose.position.x ))
+			std::exit(0);
+	}
+
+	int temp = uniqueRedPoses.size();
+	for(int i=0; i<temp; ++i)
+	{
+		if(uniqueRedPoses.empty())
+			break;
+
+		flag = false;
+		min = FLT_MAX;
+		for(int k=0; k<currPose.size();++k)
+		{
+			int j = 0;
+			while(j < uniqueRedPoses.size())
+			{
+				displacement = sqrt((currPose[k].pose.position.x - uniqueRedPoses[j].getX())*
+								(currPose[k].pose.position.x - uniqueRedPoses[j].getX()) +
+									(currPose[k].pose.position.y - uniqueRedPoses[j].getY())*
+									(currPose[k].pose.position.y - uniqueRedPoses[j].getY()));
+				if((displacement < threshold) && flag == false)
+				{
+					flag = true;
+					min = displacement;
+					posIndex = j;
+					targetIndex = k;
+				}
+
+				if((displacement < min) && flag == true)
+				{
+					min = displacement;
+					posIndex = j;
+					targetIndex = k;
+				}
+				++j;
+			}
+		}
+
+		if(flag == false)
+			continue;
+
+		ROS_INFO_STREAM("UPDATED: KF:"<<currPose[targetIndex].pose.position.x<<" "<<currPose[targetIndex].pose.position.y<<" Red:" <<uniqueRedPoses[posIndex].getX()<<" "<<uniqueRedPoses[posIndex].getY());
+		(*targets[targetIndex]).update(Eigen::Matrix<double, 2, 1>(uniqueRedPoses[posIndex].getX(), uniqueRedPoses[posIndex].getY()), imageHeader);
+		uniqueRedPoses.erase(uniqueRedPoses.begin()+posIndex);
+		currPose.erase(currPose.begin()+targetIndex);
+	}
+
+
+	for(auto&e : uniqueRedPoses)
+	{
+		(*targets[redTargetCtr]).init(imageHeader, Eigen::Matrix<double, 4, 1> (e.getX(), e.getY(), 0, 0));
+		++redTargetCtr;
+		ROS_INFO_STREAM("Made nwe KF: "<<" Red:" <<e.getX()<<" "<<e.getY());
+		for(auto&f : currPose)
+			ROS_WARN_STREAM(" \t"<<f.pose.position.x << f.pose.position.y);
+		if(redTargetCtr == 5)
+			break;
+	}
+
+	currPose.clear();
+
+
+	//GREEN
+	for(int i=0; i<greenTargetCtr; ++i)
+		currPose.push_back( (*targets[i+5]).getPoseStamped(imageHeader));
+
+	temp = uniqueGreenPoses.size();
+	for(int i=0; i<temp; ++i)
+	{
+		if(uniqueGreenPoses.empty())
+			break;
+
+		flag = false;
+		min = FLT_MAX;
+		for(int k=0; k<currPose.size();++k)
+		{
+			int j = 0;
+			while(j < uniqueGreenPoses.size())
+			{
+				displacement = sqrt((currPose[k].pose.position.x - uniqueGreenPoses[j].getX())*
+								(currPose[k].pose.position.x - uniqueGreenPoses[j].getX()) +
+									(currPose[k].pose.position.y - uniqueGreenPoses[j].getY())*
+									(currPose[k].pose.position.y - uniqueGreenPoses[j].getY()));
+				if((displacement < threshold) && flag == false)
+				{
+					flag = true;
+					min = displacement;
+					posIndex = j;
+					targetIndex = k;
+				}
+
+				if((displacement < min) && flag == true)
+				{
+					min = displacement;
+					posIndex = j;
+					targetIndex = k;
+				}
+				++j;
+			}
+		}
+
+		if(flag == false)
+			continue;
+
+		ROS_INFO_STREAM("UPDATED");
+		(*targets[targetIndex+5]).update(Eigen::Matrix<double, 2, 1>(uniqueGreenPoses[posIndex].getX(), uniqueGreenPoses[posIndex].getY()), imageHeader);
+		uniqueGreenPoses.erase(uniqueGreenPoses.begin()+posIndex);
+		currPose.erase(currPose.begin()+targetIndex);
+	}
+
+	for(auto& e:uniqueGreenPoses)
+	{
+		(*targets[greenTargetCtr+5]).init(imageHeader, Eigen::Matrix<double, 4, 1> (e.getX(), e.getY(), 0, 0));
+		++greenTargetCtr;
+		ROS_INFO_STREAM("Made nwe KF");
+
+		if(greenTargetCtr == 5)
+			break;
+	}
+
+
+	if(greenTargetCtr + redTargetCtr >= 10)
+	{
+		fullInit = true;
+		ROS_INFO_STREAM("Full init done!");
+	}
+	//MAKE SURE IT DOESNT GO OVER 10?
+}
+
 
 void Controller::getReadings()
 {
@@ -125,16 +291,16 @@ void Controller::getReadings()
 		greenTargetTracker[i].run();
 	}
 */
-	for(int i=0; i<5; ++i)
+	for(int i=0; i<redTargetTracker.size(); ++i)
 	{
-		if(redTargetTracker[i].curImgOlder)
+		if((*redTargetTracker[i]).curImgOlder)
 			continue;
 
-		for(auto& e: redTargetTracker[i].getPoses())
+		for(auto& e: (*redTargetTracker[i]).getPoses())
 		{
 			uniqueRedPoses.push_back(e);
 		}
-		for(auto& e: greenTargetTracker[i].getPoses())
+		for(auto& e: (*greenTargetTracker[i]).getPoses())
 		{
 			uniqueGreenPoses.push_back(e);
 		}
@@ -146,9 +312,9 @@ void Controller::getReadings()
 		uniqueObstaclePoses.push_back(e);
 	}
 
-	this->imageHeader = redTargetTracker[4].getHeader();
+	this->imageHeader = (*redTargetTracker[0]).getHeader();
 
-	//ROS_INFO_STREAM("Get Readings Done! Size:"<<uniqueRedPoses.size());
+//	ROS_INFO_STREAM("Get Readings Done! Size:"<<uniqueRedPoses.size());
 }
 
 //returns true if the first argument goes before the second argument in the strict weak ordering
@@ -164,11 +330,11 @@ void Controller::mergeCopies(std::vector<tf::Vector3> &uniquePoses)
 	int cur = 0;
 	int next = cur+1;
 
-	while(next < uniqueRedPoses.size())
+	while(next < uniquePoses.size())
 	{
 				//Dont need fabs for x since it's sorted
-		if(! ((uniquePoses[next].getX() - uniquePoses[cur].getX() < SPACE_BETWEEN_ROOMBA) &&
-			    fabs(uniquePoses[next].getY() - uniquePoses[cur].getY()) < SPACE_BETWEEN_ROOMBA))
+		if(! ( (uniquePoses[next].getX() - uniquePoses[cur].getX() < SPACE_BETWEEN_ROOMBA) &&
+			    (fabs(uniquePoses[next].getY() - uniquePoses[cur].getY()) < SPACE_BETWEEN_ROOMBA)))
 		{
 			cur++;
 			next++;
@@ -178,14 +344,14 @@ void Controller::mergeCopies(std::vector<tf::Vector3> &uniquePoses)
 			if(next+1 < uniquePoses.size())
 			{
 				if(! ((uniquePoses[next+1].getX() - uniquePoses[next].getX() < SPACE_BETWEEN_ROOMBA) &&
-						fabs(uniquePoses[next+1].getY() - uniquePoses[next].getY() < SPACE_BETWEEN_ROOMBA)) )
+						(fabs(uniquePoses[next+1].getY() - uniquePoses[next].getY() < SPACE_BETWEEN_ROOMBA)) ))
 				{
 					uniquePoses[cur].setX((uniquePoses[cur].getX() +
 										   uniquePoses[next].getX() ) / 2);
 					uniquePoses[cur].setY((uniquePoses[cur].getX() +
 									       uniquePoses[next].getX() ) / 2);
 
-					uniquePoses.erase(uniquePoses.begin()+next);
+					uniquePoses.erase(uniquePoses.begin()+(next));
 				}
 
 				else
@@ -197,8 +363,8 @@ void Controller::mergeCopies(std::vector<tf::Vector3> &uniquePoses)
 										   uniquePoses[next].getY() +
 										   uniquePoses[next+1].getY()) / 3);
 
-					uniquePoses.erase(uniquePoses.begin()+next);
-					uniquePoses.erase(uniquePoses.begin()+next+1);
+					uniquePoses.erase(uniquePoses.begin()+(next));
+					uniquePoses.erase(uniquePoses.begin()+(next+1));
 				}
 			}
 
@@ -209,7 +375,7 @@ void Controller::mergeCopies(std::vector<tf::Vector3> &uniquePoses)
 				uniquePoses[cur].setY((uniquePoses[cur].getX() +
 									   uniquePoses[next].getX() ) / 2);
 
-				uniquePoses.erase(uniquePoses.begin()+next);
+				uniquePoses.erase(uniquePoses.begin()+(next));
 			}
 		}
 	}
@@ -227,7 +393,7 @@ void Controller::removeCopies()
 	mergeCopies(uniqueRedPoses);
 	mergeCopies(uniqueGreenPoses);
 
-	ROS_INFO_STREAM("removeCopies done");
+//	ROS_INFO_STREAM("removeCopies done");
 }
 
 void Controller::updateTargetPos()
@@ -243,7 +409,9 @@ void Controller::updateTargetPos()
 //TODO: THIS PREDICT WITH THE PREDICTION MIGHT BE A PROBLEM
 	//RED
 	for(int i=0; i<5; ++i)
-		currPose[i] = targets[i].getPoseStamped(imageHeader);
+	{
+		currPose[i] = (*targets[i]).getPoseStamped(imageHeader);
+	}
 
 	for(int i=0; i<5; ++i)
 	{
@@ -270,14 +438,14 @@ void Controller::updateTargetPos()
 			}
 		}
 
-		targets[targetIndex].update(Eigen::Matrix<double, 2, 1>(uniqueRedPoses[posIndex].getX(), uniqueRedPoses[posIndex].getY()), imageHeader);
+		(*targets[targetIndex]).update(Eigen::Matrix<double, 2, 1>(uniqueRedPoses[posIndex].getX(), uniqueRedPoses[posIndex].getY()), imageHeader);
 		uniqueRedPoses.erase(uniqueRedPoses.begin()+posIndex);
 		currPose.erase(currPose.begin()+targetIndex);
 	}
 
 	//GREEN
 	for(int i=0; i<5; ++i)
-		currPose[i] = targets[i+5].getPoseStamped(imageHeader);
+		currPose[i] = (*targets[i+5]).getPoseStamped(imageHeader);
 
 	for(int i=0; i<5; ++i)
 	{
@@ -304,7 +472,7 @@ void Controller::updateTargetPos()
 			}
 		}
 
-		targets[targetIndex+5].update(Eigen::Matrix<double, 2, 1>  (uniqueGreenPoses[posIndex].getX(), uniqueGreenPoses[posIndex].getY()), imageHeader);
+		(*targets[targetIndex+5]).update(Eigen::Matrix<double, 2, 1>  (uniqueGreenPoses[posIndex].getX(), uniqueGreenPoses[posIndex].getY()), imageHeader);
 		uniqueGreenPoses.erase(uniqueGreenPoses.begin()+posIndex);
 		currPose.erase(currPose.begin()+targetIndex);
 	}
@@ -321,7 +489,7 @@ void Controller::updateObsPos()
 
 		//Obstacles
 		for(int i=0; i<4; ++i)
-			currPose[i] = targets[i].getPoseStamped(imageHeader);
+			currPose[i] = (*targets[i]).getPoseStamped(imageHeader);
 
 		for(int i=0; i<4; ++i)
 			{
@@ -348,7 +516,7 @@ void Controller::updateObsPos()
 					}
 				}
 
-				obstacles[targetIndex].update(Eigen::Matrix<double, 2, 1> ( uniqueObstaclePoses[posIndex].getX(), uniqueObstaclePoses[posIndex].getY()), imageHeader);
+				(*obstacles[targetIndex]).update(Eigen::Matrix<double, 2, 1> ( uniqueObstaclePoses[posIndex].getX(), uniqueObstaclePoses[posIndex].getY()), imageHeader);
 				uniqueObstaclePoses.erase(uniqueObstaclePoses.begin()+posIndex);
 				currPose.erase(currPose.begin()+targetIndex);
 			}
@@ -356,26 +524,28 @@ void Controller::updateObsPos()
 
 void Controller::publishAll()
 {
-	red1.publish(targets[0].getPoseWithCovariance(imageHeader));
-	red2.publish(targets[1].getPoseWithCovariance(imageHeader));
-	red3.publish(targets[2].getPoseWithCovariance(imageHeader));
-	red4.publish(targets[3].getPoseWithCovariance(imageHeader));
-	red5.publish(targets[4].getPoseWithCovariance(imageHeader));
-	green1.publish(targets[5].getPoseWithCovariance(imageHeader));
-	green2.publish(targets[6].getPoseWithCovariance(imageHeader));
-	green3.publish(targets[7].getPoseWithCovariance(imageHeader));
-	green4.publish(targets[8].getPoseWithCovariance(imageHeader));
-	green5.publish(targets[9].getPoseWithCovariance(imageHeader));
+	red1.publish((*targets[0]).getPoseWithCovariance(imageHeader));
+	red2.publish((*targets[1]).getPoseWithCovariance(imageHeader));
+	red3.publish((*targets[2]).getPoseWithCovariance(imageHeader));
+	red4.publish((*targets[3]).getPoseWithCovariance(imageHeader));
+	red5.publish((*targets[4]).getPoseWithCovariance(imageHeader));
+	green1.publish((*targets[5]).getPoseWithCovariance(imageHeader));
+	green2.publish((*targets[6]).getPoseWithCovariance(imageHeader));
+	green3.publish((*targets[7]).getPoseWithCovariance(imageHeader));
+	green4.publish((*targets[8]).getPoseWithCovariance(imageHeader));
+	green5.publish((*targets[9]).getPoseWithCovariance(imageHeader));
 
-	obs1.publish(obstacles[0].getPoseWithCovariance(imageHeader));
-	obs2.publish(obstacles[1].getPoseWithCovariance(imageHeader));
-	obs3.publish(obstacles[2].getPoseWithCovariance(imageHeader));
-	obs4.publish(obstacles[3].getPoseWithCovariance(imageHeader));
+	obs1.publish((*obstacles[0]).getPoseWithCovariance(imageHeader));
+	obs2.publish((*obstacles[1]).getPoseWithCovariance(imageHeader));
+	obs3.publish((*obstacles[2]).getPoseWithCovariance(imageHeader));
+	obs4.publish((*obstacles[3]).getPoseWithCovariance(imageHeader));
 }
 
 
 void Controller::run()
 {
+//	ROS_INFO_STREAM("IN RUN");
+//	uniqueRedPoses.clear(); uniqueGreenPoses.clear(); uniqueObstaclePoses.clear();
 	getReadings();
 	removeCopies();
 	updateTargetPos();

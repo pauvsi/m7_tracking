@@ -57,6 +57,7 @@ public:
 	Controller();
 	virtual ~Controller();
 	void init();
+	void updateAndInit();
 	void getReadings();
 	void removeCopies();
 	void mergeCopies(std::vector<tf::Vector3>& uniquePoses);
@@ -65,20 +66,25 @@ public:
 	void run();
 	void publishAll();
 
+	bool initialized;
+	bool fullInit;
+
 private:
 	ros::NodeHandle nh;
 	ros::Publisher posPub;
 	ros::Publisher red1, red2, red3, red4, red5, green1, green2, green3, green4, green5;
 	ros::Publisher obs1, obs2, obs3, obs4;
-	std::vector<Tracker> redTargetTracker;
-	std::vector<Tracker> greenTargetTracker;
-	std::vector<GroundVehicle> targets;
+	std::vector<Tracker*> redTargetTracker;
+	std::vector<Tracker*> greenTargetTracker;
+	std::vector<GroundVehicle*> targets;
 	std::vector<tf::Vector3> uniqueRedPoses;
 	std::vector<tf::Vector3> uniqueGreenPoses;
 	std::vector<tf::Vector3> uniqueObstaclePoses;
 	ObstacleDetector obsDet;
-	std::vector<GroundVehicle> obstacles;
+	std::vector<GroundVehicle*> obstacles;
 	std_msgs::Header imageHeader;
+	int redTargetCtr, greenTargetCtr;
+	int obsCtr;
 };
 
 
