@@ -84,12 +84,14 @@ public:
 		std::vector<tf::Vector3> result;
 		for(auto& e: worldRoombaPosition)
 			result.push_back(e);
+//		worldRoombaPosition.push_back(tf::Vector3(0, 0, 0));
+//		ROS_WARN_STREAM("WRP s:"<<this->worldRoombaPosition.size());
 		worldRoombaPosition.clear();
-
+//		ROS_WARN_STREAM("RESULT SIZE:"<<result.size());
 		return result;
 	}
 
-protected:
+private:
 
 	int target_LowHue;
 	int target_HighHue;

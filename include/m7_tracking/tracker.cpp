@@ -43,10 +43,10 @@ Tracker::Tracker()
 	ROS_DEBUG_STREAM(cameraSub.getTransport());
 
 	target_LowHue = 0;
-	target_HighHue = 8;
-	target_LowSat = 165;
+	target_HighHue = 256;
+	target_LowSat = 0;
 	target_HighSat = 256;
-	target_LowValue = 105;
+	target_LowValue = 0;
 	target_HighValue = 256;
 
 	currentImgTime = DBL_MIN;
@@ -77,7 +77,7 @@ Tracker::Tracker(std::string cameraTopic, std::string cameraFrame, int target_Lo
 
 	image_transport::ImageTransport it(nh);
 
-	this->cameraSub = it.subscribeCamera(this->getCameraTopic(), 2, &Tracker::cameraCallback, this);
+//	this->cameraSub = it.subscribeCamera(this->getCameraTopic(), 2, &Tracker::cameraCallback, this);
 
 	ROS_WARN_STREAM(cameraSub.getInfoTopic());
 	ROS_WARN_STREAM(cameraSub.getTopic());
@@ -107,7 +107,6 @@ void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor
 	{
 		curImgOlder = false;
 	}
-	ROS_WARN_STREAM("Listening To Camera: In callback");
 
 	//set the K and D matrices
 	this->setK(get3x3FromVector(cam->K));
@@ -337,7 +336,7 @@ void Tracker::getWorldPosition()
 	double lineParameter; // parameter t for line vector
 
 
-	worldRoombaPosition.clear(); //TODO: MAYBE REMOVE
+//	worldRoombaPosition.clear(); //TODO: MAYBE REMOVE
 	for(auto e: worldProjectedPoses)
 	{
 		//r = r. + tv
@@ -349,7 +348,7 @@ void Tracker::getWorldPosition()
 		//Due to vision, one roomba could have two positions. Remove this by looking at
 		//roomba size and averaging the nearby points into one roomba position
 
-		worldRoombaPosition.push_back(tf::Vector3(cameraPos.getX() + lineParameter*lineVector.getX(),
+		this->worldRoombaPosition.push_back(tf::Vector3(cameraPos.getX() + lineParameter*lineVector.getX(),
 													cameraPos.getY() + lineParameter*lineVector.getY(),
 													ROOMBA_HEIGHT));
 	}
@@ -357,12 +356,12 @@ void Tracker::getWorldPosition()
 	removeOutofBounds();
 
 
-	for(int i = 0; i<worldRoombaPosition.size(); ++i)
-	{
-		ROS_WARN_STREAM("\n Roomba "<<i+1<<" World Position: "<< worldRoombaPosition[i].getX()<<" "<<worldRoombaPosition[i].getY());
-	}
+//	for(int i = 0; i<worldRoombaPosition.size(); ++i)
+//	{
+//		ROS_WARN_STREAM("\n Roomba "<<i+1<<" World Position: "<< worldRoombaPosition[i].getX()<<" "<<worldRoombaPosition[i].getY());
+//	}
 
-
+//	ROS_INFO_STREAM("Size of WRP vector:"<<this->worldRoombaPosition.size());
 
 //	tf::TransformBroadcaster br;
 //	tf::Transform transform;

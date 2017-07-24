@@ -15,8 +15,8 @@
 #define DEFAULT_ODOM_FRAME_NAME "odom"
 #define DEFAULT_COM_FRAME_NAME "base_link"
 #define DEFAULT_WORLD_FRAME_NAME "world"
-#define DEFAULT_LIDAR_FRAME_NAME "rplidar"
-#define OBSTACLE_SPACE_THRESHOLD 0.20 //0.17. 0.34 is the diameter of a roomba
+#define DEFAULT_LIDAR_FRAME_NAME "lidar"
+#define OBSTACLE_SPACE_THRESHOLD 1.5 //0.35 //0.17. 0.34 is the diameter of a roomba
 
 class ObstacleDetector{
 public:
@@ -24,7 +24,7 @@ public:
 	ObstacleDetector(void);
 	void lidarCallback(const sensor_msgs::LaserScanConstPtr& input);
 	void run();
-	void removeDuplicates(std::vector<tf::Vector3> worldLidarPoses);
+	void removeDuplicates(std::vector<tf::Vector3>& worldLidarPoses);
 	geometry_msgs::PoseArray getPoses()
 	{
 		return obstaclePoses;
@@ -45,7 +45,7 @@ private:
 
 	ros::NodeHandle nh;
 	ros::Subscriber lidarSub;
-	ros::Publisher obstaclePublisher;
+//	ros::Publisher obstaclePublisher;
 	sensor_msgs::LaserScan lidarInput;
 	std_msgs::Header inpHeader;
 	std::string lidar_frame;

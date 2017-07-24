@@ -11,27 +11,35 @@ Controller::~Controller()
 Controller::Controller()
 {
 	ROS_INFO_STREAM("CONSTRUCTOR");
+//	image1_sub = new message_filters::Subscriber<sensor_msgs::Image>(nh, CAMERA_TOPIC_1, 20);
+//	image2_sub = new message_filters::Subscriber<sensor_msgs::Image>(nh, CAMERA_TOPIC_2, 20);
+//	image3_sub = new message_filters::Subscriber<sensor_msgs::Image>(nh, CAMERA_TOPIC_3, 20);
+//	image4_sub = new message_filters::Subscriber<sensor_msgs::Image>(nh, CAMERA_TOPIC_4, 20);
+//	image5_sub = new message_filters::Subscriber<sensor_msgs::Image>(nh, CAMERA_TOPIC_5, 20);
+//	sync = new message_filters::Synchronizer<MySyncPolicy>(MySyncPolicy(50), *image1_sub, *image2_sub, *image3_sub, *image4_sub, *image5_sub);
+//	(*sync).registerCallback(boost::bind(&Controller::callback, *this, _1, _2, _3, _4, _5));
+
 	redTargetTracker.push_back((new Tracker(CAMERA_TOPIC_1, CAMERA_FRAME_1, REDILOWHUE, REDIHIGHHUE,
 								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
-//	redTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_2, CAMERA_FRAME_2, REDILOWHUE, REDIHIGHHUE,
-//								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
-//	redTargetTracker.push_back ( *(new Tracker(CAMERA_TOPIC_3, CAMERA_FRAME_3, REDILOWHUE, REDIHIGHHUE,
-//								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
-//	redTargetTracker.push_back( *(new Tracker(CAMERA_TOPIC_4, CAMERA_FRAME_4, REDILOWHUE, REDIHIGHHUE,
-//								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
-//	redTargetTracker.push_back( *(new Tracker(CAMERA_TOPIC_5, CAMERA_FRAME_5, REDILOWHUE, REDIHIGHHUE,
-//								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
+	redTargetTracker.push_back((new Tracker(CAMERA_TOPIC_2, CAMERA_FRAME_2, REDILOWHUE, REDIHIGHHUE,
+								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
+	redTargetTracker.push_back ( (new Tracker(CAMERA_TOPIC_3, CAMERA_FRAME_3, REDILOWHUE, REDIHIGHHUE,
+								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
+	redTargetTracker.push_back( (new Tracker(CAMERA_TOPIC_4, CAMERA_FRAME_4, REDILOWHUE, REDIHIGHHUE,
+								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
+	redTargetTracker.push_back( (new Tracker(CAMERA_TOPIC_5, CAMERA_FRAME_5, REDILOWHUE, REDIHIGHHUE,
+								REDILOWSATURATION, REDIHIGHSATURATION, REDILOWVALUE, REDIHIGHVALUE)));
 
 	greenTargetTracker.push_back( (new Tracker(CAMERA_TOPIC_1, CAMERA_FRAME_1, GREENILOWHUE, GREENIHIGHHUE,
 										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
-//	greenTargetTracker.push_back( *(new Tracker(CAMERA_TOPIC_2, CAMERA_FRAME_2, GREENILOWHUE, GREENIHIGHHUE,
-//										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
-//	greenTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_3, CAMERA_FRAME_3, GREENILOWHUE, GREENIHIGHHUE,
-//										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
-//	greenTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_4, CAMERA_FRAME_4, GREENILOWHUE, GREENIHIGHHUE,
-//										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
-//	greenTargetTracker.push_back(*(new Tracker(CAMERA_TOPIC_5, CAMERA_FRAME_5, GREENILOWHUE, GREENIHIGHHUE,
-//										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
+	greenTargetTracker.push_back( (new Tracker(CAMERA_TOPIC_2, CAMERA_FRAME_2, GREENILOWHUE, GREENIHIGHHUE,
+										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
+	greenTargetTracker.push_back((new Tracker(CAMERA_TOPIC_3, CAMERA_FRAME_3, GREENILOWHUE, GREENIHIGHHUE,
+										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
+	greenTargetTracker.push_back((new Tracker(CAMERA_TOPIC_4, CAMERA_FRAME_4, GREENILOWHUE, GREENIHIGHHUE,
+										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
+	greenTargetTracker.push_back((new Tracker(CAMERA_TOPIC_5, CAMERA_FRAME_5, GREENILOWHUE, GREENIHIGHHUE,
+										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE)));
 
 
 	// INITIALIZE KALMAN FILTERS
@@ -63,6 +71,26 @@ Controller::Controller()
 	fullInit = false;
 //	this->init();
 
+
+}
+
+void Controller::callback(const sensor_msgs::ImageConstPtr& img1, const sensor_msgs::CameraInfoConstPtr& cam1, const sensor_msgs::ImageConstPtr& img2, const sensor_msgs::CameraInfoConstPtr& cam2, const sensor_msgs::ImageConstPtr& img3, const sensor_msgs::CameraInfoConstPtr& cam3, const sensor_msgs::ImageConstPtr& img4, const sensor_msgs::CameraInfoConstPtr& cam4, const sensor_msgs::ImageConstPtr& img5)
+{
+	ROS_INFO_STREAM("Sync Message Received");
+	sensor_msgs::CameraInfoConstPtr cam5(cam4);
+//	cam5.
+
+	(*redTargetTracker[0]).cameraCallback(img1, cam1);
+	(*redTargetTracker[1]).cameraCallback(img2, cam2);
+	(*redTargetTracker[2]).cameraCallback(img3, cam3);
+	(*redTargetTracker[3]).cameraCallback(img4, cam4);
+	(*redTargetTracker[4]).cameraCallback(img5, cam4);
+
+	(*greenTargetTracker[0]).cameraCallback(img1, cam1);
+	(*greenTargetTracker[1]).cameraCallback(img2, cam2);
+	(*greenTargetTracker[2]).cameraCallback(img3, cam3);
+	(*greenTargetTracker[3]).cameraCallback(img4, cam4);
+	(*greenTargetTracker[4]).cameraCallback(img5, cam4);
 
 }
 

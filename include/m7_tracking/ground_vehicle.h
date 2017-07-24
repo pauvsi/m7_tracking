@@ -20,7 +20,7 @@
 #include <std_msgs/Header.h>
 
 #define ROOMBA_HEIGHT 0.09
-#define TIME_STEP 1.0 //0.1
+#define TIME_STEP 0.1
 
 class GroundVehicle
 {
@@ -33,7 +33,7 @@ public:
 					 const Eigen::Matrix4d& P);
 
 	GroundVehicle();
-	void init(double t0, const Eigen::Matrix<double, 4, 1>& x0);
+	void init(std_msgs::Header imageHeader, const Eigen::Matrix<double, 4, 1>& x0);
 	void predict(std_msgs::Header imageHeader);
 	void update(const Eigen::Matrix<double, 2, 1>& y, std_msgs::Header imageHeader);
 

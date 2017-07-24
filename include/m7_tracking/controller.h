@@ -13,16 +13,21 @@
 //#include <string.h>
 #include <iterator>
 #include <std_msgs/Header.h>
+#include <message_filters/sync_policies/approximate_time.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/synchronizer.h>
 
 #include "tracker.h"
 #include "ground_vehicle.h"
 #include "rplidar.h"
 
-//#define CAMERA_TOPIC_1 "bottom_camera/image_color_rect"
-//#define CAMERA_TOPIC_2 "front_camera/image_color_rect"
-//#define CAMERA_TOPIC_3 "right_camera/image_color_rect"
-//#define CAMERA_TOPIC_4 "back_camera/image_color_rect"
-//#define CAMERA_TOPIC_5 "left_camera/image_color_rect"
+#define testing true
+
+//#define CAMERA_TOPIC_1 "bottom_camera/image_rect_color"
+//#define CAMERA_TOPIC_2 "front_camera/image_rect_color"
+//#define CAMERA_TOPIC_3 "right_camera/image_rect_color"
+//#define CAMERA_TOPIC_4 "back_camera/image_rect_color"
+//#define CAMERA_TOPIC_5 "left_camera/image_rect_color"
 
 #define CAMERA_TOPIC_1 "bottom_camera/image_raw"
 #define CAMERA_TOPIC_2 "front_camera/image_raw"
@@ -36,6 +41,12 @@
 #define CAMERA_FRAME_4 "back_camera"
 #define CAMERA_FRAME_5 "left_camera"
 
+#define CAMERA_INFO_1 "bottom_camera/camera_info"
+#define CAMERA_INFO_2 "front_camera/camera_info"
+#define CAMERA_INFO_3 "right_camera/camera_info"
+#define CAMERA_INFO_4 "bottom_camera/camera_info"
+
+
 #define REDILOWHUE 0
 #define	REDIHIGHHUE 8
 #define REDILOWSATURATION 165
@@ -43,14 +54,16 @@
 #define REDILOWVALUE 105
 #define REDIHIGHVALUE 256
 
-#define GREENILOWHUE 0
-#define	GREENIHIGHHUE 179
-#define GREENILOWSATURATION 0
-#define GREENIHIGHSATURATION 255
-#define GREENILOWVALUE 0
+#define GREENILOWHUE 50
+#define	GREENIHIGHHUE 62
+#define GREENILOWSATURATION 185
+#define GREENIHIGHSATURATION 240
+#define GREENILOWVALUE 215
 #define GREENIHIGHVALUE 255
 
 #define SPACE_BETWEEN_ROOMBA 0.2
+
+//typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::Image> MySyncPolicy;
 
 class Controller{
 public:
@@ -65,6 +78,7 @@ public:
 	void updateObsPos();
 	void run();
 	void publishAll();
+	void callback(const sensor_msgs::ImageConstPtr& img1, const sensor_msgs::CameraInfoConstPtr& cam1, const sensor_msgs::ImageConstPtr& img2, const sensor_msgs::CameraInfoConstPtr& cam2, const sensor_msgs::ImageConstPtr& img3, const sensor_msgs::CameraInfoConstPtr& cam3, const sensor_msgs::ImageConstPtr& img4, const sensor_msgs::CameraInfoConstPtr& cam4, const sensor_msgs::ImageConstPtr& img5);
 
 	bool initialized;
 	bool fullInit;
@@ -80,6 +94,14 @@ private:
 	std::vector<tf::Vector3> uniqueRedPoses;
 	std::vector<tf::Vector3> uniqueGreenPoses;
 	std::vector<tf::Vector3> uniqueObstaclePoses;
+
+//	message_filters::Subscriber<sensor_msgs::Image>* image1_sub;
+//	message_filters::Subscriber<sensor_msgs::Image>* image2_sub;
+//	message_filters::Subscriber<sensor_msgs::Image>* image3_sub;
+//	message_filters::Subscriber<sensor_msgs::Image>* image4_sub;
+//	message_filters::Subscriber<sensor_msgs::Image>* image5_sub;
+//	message_filters::Synchronizer<MySyncPolicy>* sync;
+
 	ObstacleDetector obsDet;
 	std::vector<GroundVehicle*> obstacles;
 	std_msgs::Header imageHeader;

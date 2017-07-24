@@ -47,11 +47,11 @@ GroundVehicle::GroundVehicle()
 	firstRun = true;
 }
 
-void GroundVehicle::init(double t0, const Eigen::Matrix<double, 4, 1>& x0)
+void GroundVehicle::init(std_msgs::Header imageHeader, const Eigen::Matrix<double, 4, 1>& x0)
 {
 	x_hat = x_hat_new = x0;
-	this->t0 = t0;
-	t = t0;
+	dataHeader = imageHeader;
+	this->t0 = t = imageHeader.stamp.toSec();
 	initialized = true;
 
 }
@@ -72,7 +72,7 @@ void GroundVehicle::predict(std_msgs::Header imageHeader)
 	Q(2,2) = Q(3,3) = 0.5*timeDiff;
 	x_hat_new = F*x_hat;
 
-
+//	ROS_INFO_STREAM("Predicted: \n"<<x_hat_new);
 //	dt = dt + timeStep;
 //	ROS_WARN_STREAM("Dt after predict:"<<dt);
 }
@@ -86,27 +86,34 @@ void GroundVehicle::update(const Eigen::Matrix<double, 2, 1>& z, std_msgs::Heade
 	}
 
 
-	if(!firstRun)
-	{
+//	if(!firstRun)
+//	{
 		double timeDiff = (imageHeader.stamp.toSec() - dataHeader.stamp.toSec());
 		F(0,2) = F(1,3) = timeDiff;
 		Q(0,0) = Q(1,1) = 0.1*timeDiff;
 		Q(2,2) = Q(3,3) = 0.5*timeDiff;
 		x_hat_new = F*x_hat;
-		P = F*P*F.transpose() + Q;
-	}
-	else
-		firstRun = false;
+		ROS_INFO_STREAM("p BEFORE:\n"<<P);
+		P = F*P*(F.transpose()) + Q;
+//	}
+//	else
+//		firstRun = false;
 
+		ROS_INFO_STREAM("TimeDiff: "<<timeDiff);
+		ROS_INFO_STREAM("F:\n"<<F);
+		ROS_INFO_STREAM("x_hat_new:\n"<<x_hat_new);
+		ROS_INFO_STREAM("P:\n"<<P);
 
 	Eigen::Matrix<double, 2, 1> y = z - H*x_hat_new;
 
 	Eigen::Matrix<double, 2, 2> S = H*P*H.transpose() + R;
-	K = P*H.transpose()*S.inverse();
+	K = P*(H.transpose())*(S.inverse());
+	ROS_INFO_STREAM("S:\n"<<S<<"\nK:\n"<<K);
 	x_hat = x_hat_new + K*(y);
 	P = (I - K*H)*P;
 //	x_hat = x_hat_new;
 
+	ROS_INFO_STREAM("Updated:\n"<<x_hat);
 
 	t = t + imageHeader.stamp.toSec() - dataHeader.stamp.toSec() ;
 	dataHeader = imageHeader;
