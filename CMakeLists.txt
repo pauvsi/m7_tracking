@@ -41,16 +41,14 @@ include_directories(
   ${Eigen_INCLUDE_DIRS}
 )
 
-add_library(tracker include/m7_tracking/tracker.cpp)
-add_library(lidar_tracking include/m7_tracking/rplidar.cpp)
-add_library(roomba include/m7_tracking/ground_vehicle.cpp)
-add_library(controller include/m7_tracking/controller.cpp)
-add_executable(roomba_tracker src/roomba_tracking.cpp)
 
-target_link_libraries(tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
-    ${Eigen_LIBRARIES})
-target_link_libraries(lidar_tracking ${catkin_LIBRARIES})
-target_link_libraries(roomba ${catkin_LIBRARIES} ${Eigen_LIBRARIES})
-target_link_libraries(controller ${catkin_LIBRARIES} ${Eigen_LIBRARIES})
-target_link_libraries(roomba_tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
-    ${Eigen_LIBRARIES} controller lidar_tracking roomba tracker)
+add_library(m7_tracker_params include/m7_tracking/Params.h include/m7_tracking/Params.cpp)
+set_target_properties(m7_tracker_params PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries(m7_tracker_params ${catkin_LIBRARIES})
+
+add_library(m7_tracker include/m7_tracking/Tracker.cpp)
+target_link_libraries(m7_tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES} m7_tracker_params)
+
+add_executable(roomba_tracker src/roomba_tracking.cpp)
+target_link_libraries(roomba_tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES} m7_tracker_params m7_tracker)
+

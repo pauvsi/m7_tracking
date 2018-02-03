@@ -1,5 +1,7 @@
 <launch>
 
-	<node pkg="m7_tracking" type="roomba_tracker" name="roomba_tracker" launch-prefix="xterm -e gdb -args" />
+	<node pkg="m7_tracking" type="roomba_tracker" name="roomba_tracker">
+		
+	</node>
 
 </launch>
