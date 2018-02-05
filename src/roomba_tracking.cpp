@@ -5,48 +5,74 @@
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
 
+#include <image_transport/image_transport.h>
+
+#include <tf/transform_listener.h>
 
 #include "../include/m7_tracking/Tracker.h"
 #include "../include/m7_tracking/Params.h"
 
 
-void callback(const sensor_msgs::ImageConstPtr& img1, const sensor_msgs::CameraInfoConstPtr& cam1, const sensor_msgs::ImageConstPtr& img2, const sensor_msgs::CameraInfoConstPtr& cam2, const sensor_msgs::ImageConstPtr& img3, const sensor_msgs::CameraInfoConstPtr& cam3, const sensor_msgs::ImageConstPtr& img4, const sensor_msgs::CameraInfoConstPtr& cam4)
-{
+tf::TransformListener* tf;
+
+void camera1_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam){
+
+}
+
+void camera2_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam){
+
+}
+
+void camera3_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam){
+
+}
+
+void camera4_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam){
 
 }
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "m7_tracking", ros::init_options::AnonymousName);
-    ros::NodeHandle nh;
+	ros::init(argc, argv, "m7_tracking", ros::init_options::AnonymousName);
+	ros::NodeHandle nh;
 
-    ros::param::param<std::string>("~image_topic_1", CAMERA_IMAGE_TOPIC_1, D_CAMERA_IMAGE_TOPIC_1);
-    ros::param::param<std::string>("~image_topic_2", CAMERA_IMAGE_TOPIC_2, D_CAMERA_IMAGE_TOPIC_2);
-    ros::param::param<std::string>("~image_topic_3", CAMERA_IMAGE_TOPIC_3, D_CAMERA_IMAGE_TOPIC_3);
-    ros::param::param<std::string>("~image_topic_4", CAMERA_IMAGE_TOPIC_4, D_CAMERA_IMAGE_TOPIC_4);
+	tf = new tf::TransformListener(nh);
 
-    ros::param::param<std::string>("~camera_topic_1", CAMERA_INFO_TOPIC_1, D_CAMERA_INFO_TOPIC_1);
-    ros::param::param<std::string>("~camera_topic_2", CAMERA_INFO_TOPIC_2, D_CAMERA_INFO_TOPIC_2);
-    ros::param::param<std::string>("~camera_topic_3", CAMERA_INFO_TOPIC_3, D_CAMERA_INFO_TOPIC_3);
-    ros::param::param<std::string>("~camera_topic_4", CAMERA_INFO_TOPIC_4, D_CAMERA_INFO_TOPIC_4);
+	ros::param::param<std::string>("~image_topic_1", CAMERA_IMAGE_TOPIC_1, D_CAMERA_IMAGE_TOPIC_1);
+	ros::param::param<std::string>("~image_topic_2", CAMERA_IMAGE_TOPIC_2, D_CAMERA_IMAGE_TOPIC_2);
+	ros::param::param<std::string>("~image_topic_3", CAMERA_IMAGE_TOPIC_3, D_CAMERA_IMAGE_TOPIC_3);
+	ros::param::param<std::string>("~image_topic_4", CAMERA_IMAGE_TOPIC_4, D_CAMERA_IMAGE_TOPIC_4);
 
-    message_filters::Subscriber<sensor_msgs::Image> image1_sub(nh, CAMERA_IMAGE_TOPIC_1, 20);
-    message_filters::Subscriber<sensor_msgs::CameraInfo> cinfo1_sub(nh, CAMERA_INFO_TOPIC_1, 20);
-    message_filters::Subscriber<sensor_msgs::Image> image2_sub(nh, CAMERA_IMAGE_TOPIC_2, 20);
-    message_filters::Subscriber<sensor_msgs::CameraInfo> cinfo2_sub(nh, CAMERA_INFO_TOPIC_2, 20);
-    message_filters::Subscriber<sensor_msgs::Image> image3_sub(nh, CAMERA_IMAGE_TOPIC_3, 20);
-    message_filters::Subscriber<sensor_msgs::CameraInfo> cinfo3_sub(nh, CAMERA_INFO_TOPIC_3, 20);
-    message_filters::Subscriber<sensor_msgs::Image> image4_sub(nh, CAMERA_IMAGE_TOPIC_4, 20);
-    message_filters::Subscriber<sensor_msgs::CameraInfo> cinfo4_sub(nh, CAMERA_INFO_TOPIC_4, 20);
+	ros::param::param<std::string>("~image__topic_1", RED_HUE_HSV_HIGH, D_RED_HUE_HSV_HIGH);
+	ros::param::param<std::string>("~image_topic_2", RED_HUE_HSV_LOW, D_HUE_RED_HSV_LOW);
+	ros::param::param<std::string>("~image_topic_2", RED_SATURATION_HSV_HIGH, D_SATURATION_RED_HSV_HIGH);
+	ros::param::param<std::string>("~image_topic_2", RED_SATURATION_HSV_LOW, D_SATURATION_RED_HSV_LOW);
+	ros::param::param<std::string>("~image_topic_2", RED_VALUE_HSV_HIGH, D_VALUE_RED_HSV_HIGH);
+	ros::param::param<std::string>("~image_topic_2", RED_VALUE_HSV_LOW, D_VALUE_RED_HSV_LOW);
+
+	ros::param::param<std::string>("~image__topic_1", GREEN_HUE_HSV_HIGH, D_GREEN_HUE_HSV_HIGH);
+	ros::param::param<std::string>("~image_topic_2", GREEN_HUE_HSV_LOW, D_HUE_GREEN_HSV_LOW);
+	ros::param::param<std::string>("~image_topic_2", GREEN_SATURATION_HSV_HIGH, D_SATURATION_GREEN_HSV_HIGH);
+	ros::param::param<std::string>("~image_topic_2", GREEN_SATURATION_HSV_LOW, D_SATURATION_GREEN_HSV_LOW);
+	ros::param::param<std::string>("~image_topic_2", GREEN_VALUE_HSV_HIGH, D_VALUE_GREEN_HSV_HIGH);
+	ros::param::param<std::string>("~image_topic_2", GREEN_VALUE_HSV_LOW, D_VALUE_GREEN_HSV_LOW);
 
 
-    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::CameraInfo, sensor_msgs::Image, sensor_msgs::CameraInfo, sensor_msgs::Image, sensor_msgs::CameraInfo, sensor_msgs::Image, sensor_msgs::CameraInfo, sensor_msgs::Image> MySyncPolicy;
+	// setup image transport
+	image_transport::ImageTransport it1(nh);
+	image_transport::CameraSubscriber cam1_sub = it1.subscribeCamera(CAMERA_IMAGE_TOPIC_1, 10, camera1_callback);
 
-	message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(50), image1_sub, cinfo1_sub, image2_sub, cinfo2_sub, image3_sub, cinfo3_sub, image4_sub, cinfo4_sub, image5_sub);
-	sync.registerCallback(boost::bind(&callback, _1, _2, _3, _4, _5, _6, _7, _8));
+	image_transport::ImageTransport it2(nh);
+	image_transport::CameraSubscriber cam2_sub = it2.subscribeCamera(CAMERA_IMAGE_TOPIC_2, 10, camera2_callback);
+
+	image_transport::ImageTransport it3(nh);
+	image_transport::CameraSubscriber cam3_sub = it3.subscribeCamera(CAMERA_IMAGE_TOPIC_3, 10, camera3_callback);
+
+	image_transport::ImageTransport it4(nh);
+	image_transport::CameraSubscriber cam4_sub = it4.subscribeCamera(CAMERA_IMAGE_TOPIC_4, 10, camera4_callback);
 
 
 	ros::spin();
 
-    return 0;
+	return 0;
 }

@@ -14,6 +14,7 @@ class Tracker {
 public:
 	Tracker();
 	virtual ~Tracker();
+
 };
 
 #endif /* M7_TRACKING_INCLUDE_M7_TRACKING_TRACKER_H_ */
