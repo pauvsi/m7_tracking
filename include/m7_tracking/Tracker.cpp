@@ -16,7 +16,7 @@ Tracker::~Tracker() {
 	// TODO Auto-generated destructor stub
 }
 
-void Tracker::displayTargets()
+void Tracker::displayTargets(std::vector<int> imgRoombaPoses)
 {
 		cv::Mat display = this->inputImg;
 		for(int i=0; i<imgRoombaPoses.size(); ++i)
@@ -37,6 +37,8 @@ void Tracker::run(cv::Mat inputImg, int target_LowHue, int target_LowSat, int ta
 
 	cv::Mat imgHSV;
 	cv::Mat imgThresholded;
+	std::vector<int> imgRoombaPoses;
+
 
 	cv::cvtColor(inputImg, imgHSV, cv::COLOR_BGR2HSV);
 
@@ -67,11 +69,11 @@ void Tracker::run(cv::Mat inputImg, int target_LowHue, int target_LowSat, int ta
 
 			if(oMoments[i].m00 > 500)
 			{
-				imgRoombaPoses.push_back(Point2f(oMoments[i].m10 / oMoments[i].m00 , oMoments[i].m01 / oMoments[i].m00));
+				imgRoombaPoses.push_back(cv::Point2f(oMoments[i].m10 / oMoments[i].m00 , oMoments[i].m01 / oMoments[i].m00));
 			}
 		}
 
-		displayTargets();
+		displayTargets(imgRoombaPoses);
 
 
 

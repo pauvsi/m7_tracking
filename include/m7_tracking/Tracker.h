@@ -27,6 +27,7 @@ public:
 
 
 	void run(cv::Mat inputImg, int target_LowHue, int target_LowSat, int target_LowValue,int target_HighHue, int target_HighSat, int target_HighValue);
+	void displayTargets(std::vector<int> imgRoombaPoses);
 
 };
 
