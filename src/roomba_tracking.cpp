@@ -43,19 +43,19 @@ int main(int argc, char** argv)
 	ros::param::param<std::string>("~image_topic_3", CAMERA_IMAGE_TOPIC_3, D_CAMERA_IMAGE_TOPIC_3);
 	ros::param::param<std::string>("~image_topic_4", CAMERA_IMAGE_TOPIC_4, D_CAMERA_IMAGE_TOPIC_4);
 
-	ros::param::param<std::string>("~image__topic_1", RED_HUE_HSV_HIGH, D_RED_HUE_HSV_HIGH);
-	ros::param::param<std::string>("~image_topic_2", RED_HUE_HSV_LOW, D_HUE_RED_HSV_LOW);
-	ros::param::param<std::string>("~image_topic_2", RED_SATURATION_HSV_HIGH, D_SATURATION_RED_HSV_HIGH);
-	ros::param::param<std::string>("~image_topic_2", RED_SATURATION_HSV_LOW, D_SATURATION_RED_HSV_LOW);
-	ros::param::param<std::string>("~image_topic_2", RED_VALUE_HSV_HIGH, D_VALUE_RED_HSV_HIGH);
-	ros::param::param<std::string>("~image_topic_2", RED_VALUE_HSV_LOW, D_VALUE_RED_HSV_LOW);
+	ros::param::param<std::string>("~bounds red_hue_high", RED_HUE_HSV_HIGH, D_RED_HUE_HSV_HIGH);
+	ros::param::param<std::string>("~bounds_red_hue_low", RED_HUE_HSV_LOW, D_RED_HUE_HSV_LOW);
+	ros::param::param<std::string>("~bounds_red_saturation_high", RED_SATURATION_HSV_HIGH, D_RED_SATURATION_HSV_HIGH);
+	ros::param::param<std::string>("~bounds_red_saturation_low", RED_SATURATION_HSV_LOW, D_RED_SATURATION_HSV_LOW);
+	ros::param::param<std::string>("~bounds_red_value_high", RED_VALUE_HSV_HIGH, D_RED_VALUE_HSV_HIGH);
+	ros::param::param<std::string>("~bounds red_value_high", RED_VALUE_HSV_LOW, D_RED_VALUE_HSV_LOW);
 
-	ros::param::param<std::string>("~image__topic_1", GREEN_HUE_HSV_HIGH, D_GREEN_HUE_HSV_HIGH);
-	ros::param::param<std::string>("~image_topic_2", GREEN_HUE_HSV_LOW, D_HUE_GREEN_HSV_LOW);
-	ros::param::param<std::string>("~image_topic_2", GREEN_SATURATION_HSV_HIGH, D_SATURATION_GREEN_HSV_HIGH);
-	ros::param::param<std::string>("~image_topic_2", GREEN_SATURATION_HSV_LOW, D_SATURATION_GREEN_HSV_LOW);
-	ros::param::param<std::string>("~image_topic_2", GREEN_VALUE_HSV_HIGH, D_VALUE_GREEN_HSV_HIGH);
-	ros::param::param<std::string>("~image_topic_2", GREEN_VALUE_HSV_LOW, D_VALUE_GREEN_HSV_LOW);
+	ros::param::param<std::string>("~bounds__green_hue_high", GREEN_HUE_HSV_HIGH, D_GREEN_HUE_HSV_HIGH);
+	ros::param::param<std::string>("~bounds_green_hue_low", GREEN_HUE_HSV_LOW, D_GREEN_HUE_HSV_LOW);
+	ros::param::param<std::string>("~bounds_green_saturation_high", GREEN_SATURATION_HSV_HIGH, D_GREEN_SATURATION_HSV_HIGH);
+	ros::param::param<std::string>("~bounds_green_saturation_low", GREEN_SATURATION_HSV_LOW, D_GREEN_SATURATION_HSV_LOW);
+	ros::param::param<std::string>("~bounds_green_value_high", GREEN_VALUE_HSV_HIGH, D_GREEN_VALUE_HSV_HIGH);
+	ros::param::param<std::string>("~bounds_green_value_low", GREEN_VALUE_HSV_LOW, D_GREEN_VALUE_HSV_LOW);
 
 
 	// setup image transport
