@@ -16,12 +16,12 @@ Tracker::~Tracker() {
 	// TODO Auto-generated destructor stub
 }
 
-void Tracker::displayTargets(std::vector<int> imgRoombaPoses)
+void Tracker::displayTargets(std::vector<cv::Point> imgRoombaPoses, cv::Mat inputImg)
 {
-		cv::Mat display = this->inputImg;
+		cv::Mat display = inputImg;
 		for(int i=0; i<imgRoombaPoses.size(); ++i)
 		{
-			cv::circle(display,Point(imgRoombaPoses[i].x,imgRoombaPoses[i].y),5,Scalar(0,255,0),5);
+			cv::circle(display,cv::Point(imgRoombaPoses[i].x,imgRoombaPoses[i].y),5,cv::Scalar(0,255,0),5);
 		}
 
 //		imgRoombaPoses.clear();
@@ -37,12 +37,12 @@ void Tracker::run(cv::Mat inputImg, int target_LowHue, int target_LowSat, int ta
 
 	cv::Mat imgHSV;
 	cv::Mat imgThresholded;
-	std::vector<int> imgRoombaPoses;
+	std::vector<cv::Point> imgRoombaPoses;
 
 
 	cv::cvtColor(inputImg, imgHSV, cv::COLOR_BGR2HSV);
 
-	cv::inRange(imgHSV, Scalar(target_LowHue, target_LowSat, target_LowValue),Scalar(target_HighHue, target_HighSat, target_HighValue), imgThresholded);
+	cv::inRange(imgHSV, cv::Scalar(target_LowHue, target_LowSat, target_LowValue),cv::Scalar(target_HighHue, target_HighSat, target_HighValue), imgThresholded);
 
 	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(8,8)));
 	cv::dilate(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(8,8)));
@@ -51,7 +51,7 @@ void Tracker::run(cv::Mat inputImg, int target_LowHue, int target_LowSat, int ta
 	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(6, 6)) );
 
 	cv::Mat imgCanny;
-	std::vector<vector<cv::Point> > contours;
+	std::vector<std::vector<cv::Point> > contours;
 	std::vector<cv::Vec4i> hierarchy;
 
 	cv::Canny(imgThresholded, imgCanny, CANNY_THRESHOLD, CANNY_THRESHOLD*2);
@@ -73,7 +73,7 @@ void Tracker::run(cv::Mat inputImg, int target_LowHue, int target_LowSat, int ta
 			}
 		}
 
-		displayTargets(imgRoombaPoses);
+		displayTargets(imgRoombaPoses,inputImg);
 
 
 

@@ -20,6 +20,14 @@
 #include <vector>
 #include <string>
 
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2_ros/message_filter.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf/tf.h>
+#include <tf/transform_listener.h>
+#include <tf/tf.h>
+#include <tf/tfMessage.h>
+
 class Tracker {
 public:
 	Tracker();
@@ -27,7 +35,7 @@ public:
 
 
 	void run(cv::Mat inputImg, int target_LowHue, int target_LowSat, int target_LowValue,int target_HighHue, int target_HighSat, int target_HighValue);
-	void displayTargets(std::vector<int> imgRoombaPoses);
+	void displayTargets(std::vector<cv::Point> imgRoombaPoses, cv::Mat inputImg);
 
 };
 
