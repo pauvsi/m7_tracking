@@ -10,9 +10,12 @@
 
 #include "Params.h"
 
+#include <ros/ros.h>
+
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/features2d.hpp>
+#include <cv_bridge/cv_bridge.h>
 #include "opencv2/core/core.hpp"
 #include "opencv2/features2d/features2d.hpp"
 #include "opencv2/xfeatures2d.hpp"
@@ -27,6 +30,8 @@
 #include <tf/transform_listener.h>
 #include <tf/tf.h>
 #include <tf/tfMessage.h>
+#include <sensor_msgs/CameraInfo.h>
+#include <sensor_msgs/Image.h>
 
 class Tracker {
 public:
@@ -34,7 +39,7 @@ public:
 	virtual ~Tracker();
 
 
-	void run(cv::Mat inputImg, int target_LowHue, int target_LowSat, int target_LowValue,int target_HighHue, int target_HighSat, int target_HighValue);
+	void run(const sensor_msgs::ImageConstPtr& inputImg);
 	void displayTargets(std::vector<cv::Point> imgRoombaPoses, cv::Mat inputImg);
 
 };

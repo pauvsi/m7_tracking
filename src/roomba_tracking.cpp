@@ -15,27 +15,31 @@
 
 tf::TransformListener* tf_listener;
 
+Tracker tracker;
+
 void camera1_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam){
+	ROS_DEBUG_STREAM("CAMERA_1_IMG_RECEIVED");
+	tracker.run(img);
 
 }
 
 void camera2_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam){
-
+	ROS_DEBUG_STREAM("CAMERA_2_IMG_RECEIVED");
 }
 
 void camera3_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam){
-
+	ROS_DEBUG_STREAM("CAMERA_3_IMG_RECEIVED");
 }
 
 void camera4_callback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam){
-
+	ROS_DEBUG_STREAM("CAMERA_4_IMG_RECEIVED");
 }
 
 int main(int argc, char** argv)
 {
-	ros::init(argc, argv, "m7_tracking", ros::init_options::AnonymousName);
+	ros::init(argc, argv, "m7_tracking");
 	ros::NodeHandle nh;
-
+	ROS_INFO_STREAM("SUBSCSRIBING");
 	tf_listener = new tf::TransformListener();
 
 	ros::param::param<std::string>("~image_topic_1", CAMERA_IMAGE_TOPIC_1, D_CAMERA_IMAGE_TOPIC_1);
@@ -43,14 +47,14 @@ int main(int argc, char** argv)
 	ros::param::param<std::string>("~image_topic_3", CAMERA_IMAGE_TOPIC_3, D_CAMERA_IMAGE_TOPIC_3);
 	ros::param::param<std::string>("~image_topic_4", CAMERA_IMAGE_TOPIC_4, D_CAMERA_IMAGE_TOPIC_4);
 
-	ros::param::param<int>("~bounds red_hue_high", RED_HUE_HSV_HIGH, D_RED_HUE_HSV_HIGH);
+	ros::param::param<int>("~bounds_red_hue_high", RED_HUE_HSV_HIGH, D_RED_HUE_HSV_HIGH);
 	ros::param::param<int>("~bounds_red_hue_low", RED_HUE_HSV_LOW, D_RED_HUE_HSV_LOW);
 	ros::param::param<int>("~bounds_red_saturation_high", RED_SATURATION_HSV_HIGH, D_RED_SATURATION_HSV_HIGH);
 	ros::param::param<int>("~bounds_red_saturation_low", RED_SATURATION_HSV_LOW, D_RED_SATURATION_HSV_LOW);
 	ros::param::param<int>("~bounds_red_value_high", RED_VALUE_HSV_HIGH, D_RED_VALUE_HSV_HIGH);
-	ros::param::param<int>("~bounds red_value_high", RED_VALUE_HSV_LOW, D_RED_VALUE_HSV_LOW);
+	ros::param::param<int>("~bounds_red_value_high", RED_VALUE_HSV_LOW, D_RED_VALUE_HSV_LOW);
 
-	ros::param::param<int>("~bounds__green_hue_high", GREEN_HUE_HSV_HIGH, D_GREEN_HUE_HSV_HIGH);
+	ros::param::param<int>("~bounds_green_hue_high", GREEN_HUE_HSV_HIGH, D_GREEN_HUE_HSV_HIGH);
 	ros::param::param<int>("~bounds_green_hue_low", GREEN_HUE_HSV_LOW, D_GREEN_HUE_HSV_LOW);
 	ros::param::param<int>("~bounds_green_saturation_high", GREEN_SATURATION_HSV_HIGH, D_GREEN_SATURATION_HSV_HIGH);
 	ros::param::param<int>("~bounds_green_saturation_low", GREEN_SATURATION_HSV_LOW, D_GREEN_SATURATION_HSV_LOW);
@@ -59,7 +63,7 @@ int main(int argc, char** argv)
 
 	ros::param::param<int>("~bounds_canny", CANNY_THRESHOLD, D_CANNY_THRESHOLD);
 
-
+	ROS_INFO_STREAM("SUBSCSRIBING");
 	// setup image transport
 	image_transport::ImageTransport it1(nh);
 	image_transport::CameraSubscriber cam1_sub = it1.subscribeCamera(CAMERA_IMAGE_TOPIC_1, 10, camera1_callback);
@@ -73,6 +77,7 @@ int main(int argc, char** argv)
 	image_transport::ImageTransport it4(nh);
 	image_transport::CameraSubscriber cam4_sub = it4.subscribeCamera(CAMERA_IMAGE_TOPIC_4, 10, camera4_callback);
 
+	ROS_INFO_STREAM("SUBSCRIBED");
 
 	ros::spin();
 

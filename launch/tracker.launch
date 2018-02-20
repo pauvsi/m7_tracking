@@ -1,7 +1,7 @@
 <launch>
 
-	<node pkg="m7_tracking" type="roomba_tracker" name="roomba_tracker">
-		
+	<node pkg="m7_tracking" type="roomba_tracker" name="roomba_tracker" output="screen">
+		<rosparam command="load" file="$(find m7_tracking)/params/hsv.yaml" />
 	</node>
 
 </launch>

@@ -11,13 +11,13 @@
 #include <string.h>
 #include <ros/ros.h>
 
-#define D_CAMERA_IMAGE_TOPIC_1 "front_camera/image"
+#define D_CAMERA_IMAGE_TOPIC_1 "front_camera/image_raw"
 
-#define D_CAMERA_IMAGE_TOPIC_2 "left_camera/image"
+#define D_CAMERA_IMAGE_TOPIC_2 "left_camera/image_raw"
 
-#define D_CAMERA_IMAGE_TOPIC_3 "back_camera/image"
+#define D_CAMERA_IMAGE_TOPIC_3 "back_camera/image_raw"
 
-#define D_CAMERA_IMAGE_TOPIC_4 "right_camera/image"
+#define D_CAMERA_IMAGE_TOPIC_4 "right_camera/image_raw"
 
 //hsv bounds
 #define D_RED_HUE_HSV_HIGH 256
@@ -28,12 +28,12 @@
 #define	D_RED_VALUE_HSV_LOW 0
 
 
-#define D_GREEN_HUE_HSV_HIGH 256
-#define D_GREEN_HUE_HSV_LOW 0
-#define D_GREEN_SATURATION_HSV_HIGH 256
-#define D_GREEN_SATURATION_HSV_LOW 0
-#define D_GREEN_VALUE_HSV_HIGH 256
-#define D_GREEN_VALUE_HSV_LOW 0
+#define D_GREEN_HUE_HSV_HIGH 62
+#define D_GREEN_HUE_HSV_LOW 50
+#define D_GREEN_SATURATION_HSV_HIGH 240
+#define D_GREEN_SATURATION_HSV_LOW 185
+#define D_GREEN_VALUE_HSV_HIGH 255
+#define D_GREEN_VALUE_HSV_LOW 215
 
 #define D_CANNY_THRESHOLD 100
 
