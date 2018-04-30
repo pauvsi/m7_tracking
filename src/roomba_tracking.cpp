@@ -47,8 +47,10 @@ int main(int argc, char** argv)
 	ros::param::param<std::string>("~image_topic_3", CAMERA_IMAGE_TOPIC_3, D_CAMERA_IMAGE_TOPIC_3);
 	ros::param::param<std::string>("~image_topic_4", CAMERA_IMAGE_TOPIC_4, D_CAMERA_IMAGE_TOPIC_4);
 
-	ros::param::param<int>("~bounds_red_hue_high", RED_HUE_HSV_HIGH, D_RED_HUE_HSV_HIGH);
-	ros::param::param<int>("~bounds_red_hue_low", RED_HUE_HSV_LOW, D_RED_HUE_HSV_LOW);
+	ros::param::param<int>("~bounds_red_hue_high_two", RED_HUE_HSV_HIGH_TWO, D_RED_HUE_HSV_HIGH_TWO);
+	ros::param::param<int>("~bounds_red_hue_low_two", RED_HUE_HSV_LOW_TWO, D_RED_HUE_HSV_LOW_TWO);
+	ros::param::param<int>("~bounds_red_hue_high_one", RED_HUE_HSV_HIGH_ONE, D_RED_HUE_HSV_HIGH_ONE);
+	ros::param::param<int>("~bounds_red_hue_low_one", RED_HUE_HSV_LOW_ONE, D_RED_HUE_HSV_LOW_ONE);
 	ros::param::param<int>("~bounds_red_saturation_high", RED_SATURATION_HSV_HIGH, D_RED_SATURATION_HSV_HIGH);
 	ros::param::param<int>("~bounds_red_saturation_low", RED_SATURATION_HSV_LOW, D_RED_SATURATION_HSV_LOW);
 	ros::param::param<int>("~bounds_red_value_high", RED_VALUE_HSV_HIGH, D_RED_VALUE_HSV_HIGH);

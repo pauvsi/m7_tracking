@@ -4,9 +4,11 @@ bounds_green_saturation_high: 240
 bounds_green_saturation_low: 120
 bounds_green_value_high: 255
 bounds_green_value_low: 180
-bounds_red_hue_high: 180
-bounds_red_hue_low: 0
-bounds_red_saturation_high: 256
-bounds_red_saturation_low: 0
-bounds_red_value_high: 256
-bounds_red_value_high: 0
+bounds_red_hue_high_one: 55
+bounds_red_hue_low_one: 1
+bounds_red_hue_high_two: 180
+bounds_red_hue_low_two: 160
+bounds_red_saturation_high: 255
+bounds_red_saturation_low: 0 
+bounds_red_value_high: 255
+bounds_red_value_low: 0

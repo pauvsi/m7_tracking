@@ -7,6 +7,7 @@
 
 #include "Tracker.h"
 
+
 Tracker::Tracker() {
 	// TODO Auto-generated constructor stub
 
@@ -37,6 +38,8 @@ void Tracker::displayTargets(std::vector<cv::Point> imgRoombaPoses, cv::Mat inpu
 void Tracker::run(const sensor_msgs::ImageConstPtr& inputImg){
 
 	cv::Mat imgHSV;
+	cv::Mat upperRed;
+	cv::Mat lowerRed;
 	cv::Mat imgThresholded;
 	std::vector<cv::Point> imgRoombaPoses;
 
@@ -45,13 +48,16 @@ void Tracker::run(const sensor_msgs::ImageConstPtr& inputImg){
 
 	cv::cvtColor(temp, imgHSV, cv::COLOR_BGR2HSV);
 
-	cv::inRange(imgHSV, cv::Scalar(GREEN_HUE_HSV_LOW, GREEN_SATURATION_HSV_LOW, GREEN_VALUE_HSV_LOW),cv::Scalar(GREEN_HUE_HSV_HIGH, GREEN_SATURATION_HSV_HIGH,  GREEN_VALUE_HSV_HIGH), imgThresholded);
+	cv::inRange(imgHSV, cv::Scalar(RED_HUE_HSV_LOW_ONE, RED_SATURATION_HSV_LOW, RED_VALUE_HSV_LOW),cv::Scalar(RED_HUE_HSV_HIGH_ONE, RED_SATURATION_HSV_HIGH,  RED_VALUE_HSV_HIGH), upperRed);
+	cv::inRange(imgHSV, cv::Scalar(RED_HUE_HSV_LOW_TWO, RED_SATURATION_HSV_LOW, RED_VALUE_HSV_LOW),cv::Scalar(RED_HUE_HSV_HIGH_TWO, RED_SATURATION_HSV_HIGH,  RED_VALUE_HSV_HIGH), lowerRed);
+	cv::addWeighted(lowerRed, 1.0, upperRed, 1.0, 0.0, imgThresholded);
 
 	//cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(8,8)));
-	cv::dilate(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(8,8)));
+	//cv::dilate(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(8,8)));
 
-	//cv::imshow("filter 1",imgThresholded);
-	//cv::waitKey(5);
+	cv::imshow("filter 1", imgThresholded);
+	//cv::imshow("filter 2", lowerRed);
+	cv::waitKey(5);
 
 	//cv::dilate( imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(6, 6)) );
 	//cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(6, 6)) );
@@ -64,7 +70,7 @@ void Tracker::run(const sensor_msgs::ImageConstPtr& inputImg){
 	std::vector<cv::Vec4i> hierarchy;
 
 	cv::Canny(imgThresholded, imgCanny, CANNY_THRESHOLD, CANNY_THRESHOLD*2);
-	cv::findContours( imgCanny, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+	cv::findContours(imgCanny, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
 
 	std::vector<cv::Moments>  oMoments(contours.size());
 
@@ -85,7 +91,7 @@ void Tracker::run(const sensor_msgs::ImageConstPtr& inputImg){
 
 
 
-		displayTargets(imgRoombaPoses,temp);
+		//displayTargets(imgRoombaPoses,temp);
 
 
 

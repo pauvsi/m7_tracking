@@ -20,8 +20,10 @@
 #define D_CAMERA_IMAGE_TOPIC_4 "right_camera/image_raw"
 
 //hsv bounds
-#define D_RED_HUE_HSV_HIGH 256
-#define	D_RED_HUE_HSV_LOW 0
+#define D_RED_HUE_HSV_HIGH_ONE 256
+#define	D_RED_HUE_HSV_LOW_ONE 0
+#define D_RED_HUE_HSV_HIGH_TWO 256
+#define	D_RED_HUE_HSV_LOW_TWO 0
 #define	D_RED_SATURATION_HSV_HIGH 256
 #define	D_RED_SATURATION_HSV_LOW 0
 #define	D_RED_VALUE_HSV_HIGH 256
@@ -44,8 +46,10 @@ extern int GREEN_SATURATION_HSV_LOW;
 extern int GREEN_VALUE_HSV_HIGH;
 extern int GREEN_VALUE_HSV_LOW;
 
-extern int RED_HUE_HSV_HIGH;
-extern int RED_HUE_HSV_LOW;
+extern int RED_HUE_HSV_HIGH_ONE;
+extern int RED_HUE_HSV_LOW_ONE;
+extern int RED_HUE_HSV_HIGH_TWO;
+extern int RED_HUE_HSV_LOW_TWO;
 extern int RED_SATURATION_HSV_HIGH;
 extern int RED_SATURATION_HSV_LOW;
 extern int RED_VALUE_HSV_HIGH;
